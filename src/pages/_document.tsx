@@ -1,20 +1,19 @@
 import { Html, Head, Main, NextScript } from "next/document";
-import Script from "next/script";
 
 export default function Document() {
   return (
     <Html lang="en">
-      <title>BUIDLQuest</title>
+      <title>ZK Summit 11</title>
       <Head>
         <meta
           name="description"
-          content="Connect with ETHDenver attendees, engage with sponsors, and unlock unique experiences by tapping NFC chips."
+          content="Tap NFC cards at ZK Summit 11 to verifiably digitize your in-person experience."
           key="desc"
         />
-        <meta property="og:title" content="BUIDLQuest" />
+        <meta property="og:title" content="ZK Summit 11" />
         <meta
           property="og:description"
-          content="Connect with ETHDenver attendees, engage with sponsors, and unlock unique experiences by tapping NFC chips."
+          content="Tap NFC cards at ZK Summit 11 to verifiably digitize your in-person experience."
         />
         <meta property="og:image" content="/cursive.jpg" />
         <link

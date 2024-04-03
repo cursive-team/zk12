@@ -1,4 +1,4 @@
-import { object, string, boolean } from "yup";
+import { object, string } from "yup";
 import {
   deleteFromLocalStorage,
   getFromLocalStorage,
@@ -9,28 +9,20 @@ export const PROFILE_STORAGE_KEY = "profile";
 
 export type Profile = {
   displayName: string;
-  email: string;
   encryptionPublicKey: string;
   signaturePublicKey: string;
-  wantsServerCustody: boolean;
-  allowsAnalytics: boolean;
   twitterUsername?: string;
   telegramUsername?: string;
-  farcasterUsername?: string;
   bio?: string;
 };
 
 export const profileSchema = object({
   displayName: string().required(),
-  email: string().email().required(),
   encryptionPublicKey: string().required(),
   signaturePublicKey: string().required(),
-  wantsServerCustody: boolean().required(),
-  allowsAnalytics: boolean().required(),
-  twitterUsername: string().optional(),
-  telegramUsername: string().optional(),
-  farcasterUsername: string().optional(),
-  bio: string().optional(),
+  twitterUsername: string().optional().default(undefined),
+  telegramUsername: string().optional().default(undefined),
+  bio: string().optional().default(undefined),
 });
 
 export const saveProfile = (profile: Profile): void => {

@@ -12,22 +12,19 @@ datasource db {
 }
 
 model User {
-  id          Int    @id @default(autoincrement())
-  chipId      String @unique
-  email       String @unique
-  displayName String
-
-  claveInviteCode String
-  claveInviteLink String
-  claveWallet     String?
+  id          Int     @id @default(autoincrement())
+  chipId      String  @unique
+  displayName String  @unique
+  twitter     String?
+  telegram    String?
+  bio         String?
 
   encryptionPublicKey String
   signaturePublicKey  String
 
-  wantsServerCustody        Boolean
-  allowsAnalytics           Boolean
   passwordSalt              String?
   passwordHash              String?
+  authPublicKey             String?
   createdAt                 DateTime           @default(now())
   sentMessages              Message[]          @relation("MessageSender")
   receivedMessages          Message[]          @relation("MessageRecipient")
@@ -36,8 +33,6 @@ model User {
   receivedBenchmarkMessages BenchmarkMessage[] @relation("BenchmarkMessageRecipient")
   questProofs               QuestProof[]       @relation("QuestProofUser")
   admin                     Admin?
-  buidlMint                 BuidlMint[]
-  itemRedeemed              ItemRedeemed[]
 }
 
 model Admin {
@@ -48,13 +43,13 @@ model Admin {
   user         User     @relation(fields: [userId], references: [id])
 }
 
-model LocationKey {
+model ChipKey {
   id                  Int      @id @default(autoincrement())
-  locationId          Int      @unique
+  chipId              String   @unique
+  signaturePublicKey  String
   signaturePrivateKey String
   numPreviousTaps     Int      @default(0)
   createdAt           DateTime @default(now())
-  location            Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 }
 
 model Location {
@@ -67,7 +62,6 @@ model Location {
   imageUrl               String
   displayEmailWalletLink Boolean               @default(false)
   createdAt              DateTime              @default(now())
-  signaturePrivateKey    LocationKey?          @relation
   questRequirements      LocationRequirement[] @relation("LocationQuestRequirements")
 }
 
@@ -116,16 +110,12 @@ model Quest {
   description          String
   sponsor              String?
   imageUrl             String?
-  summonId             String?               @unique
-  buidlReward          Int
-  itemId               Int?                  @unique
-  priority             Int                   @default(0)  
+  priority             Int                   @default(0)
   isHidden             Boolean               @default(false)
   createdAt            DateTime              @default(now())
   userRequirements     UserRequirement[]
   locationRequirements LocationRequirement[]
   proofs               QuestProof[]          @relation("QuestForProof")
-  item                 Item?                 @relation("ItemQuestRequirement")
   userTapReq           Int?
 }
 
@@ -155,27 +145,12 @@ model LocationRequirement {
   sigNullifiers          LocationSigNullifier[]
 }
 
-model Item {
-  id           Int            @id @default(autoincrement())
-  name         String
-  sponsor      String
-  description  String
-  imageUrl     String
-  buidlCost    Int
-  questId      Int?           @unique
-  isSoldOut    Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  quest        Quest?         @relation("ItemQuestRequirement", fields: [questId], references: [id])
-  itemRedeemed ItemRedeemed[]
-}
-
 model QuestProof {
   id                    String                 @id @default(uuid())
   questId               Int
   userId                Int
   serializedProof       String
   redeemed              Boolean                @default(false)
-  minted                Boolean                @default(false)
   createdAt             DateTime               @default(now())
   quest                 Quest                  @relation(name: "QuestForProof", fields: [questId], references: [id])
   user                  User                   @relation(name: "QuestProofUser", fields: [userId], references: [id])
@@ -217,34 +192,9 @@ model BenchmarkMessage {
   recipient     User     @relation(name: "BenchmarkMessageRecipient", fields: [recipientId], references: [id])
 }
 
-model EmailWalletMint {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  locationId Int
-  sigHash    String
-  createdAt  DateTime @default(now())
-}
-
 model CmacChipRegistration {
   id             Int      @id @default(autoincrement())
   chipId         String
   isLocationChip Boolean
   createdAt      DateTime @default(now())
-}
-
-model BuidlMint {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  amount    Int
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-model ItemRedeemed {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  itemId    Int
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  item      Item     @relation(fields: [itemId], references: [id])
 }
