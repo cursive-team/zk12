@@ -18,9 +18,7 @@ const createAccountSchema = object({
   mockRef: string().optional().default(undefined),
   displayName: string().trim().required(),
   encryptionPublicKey: string().required(),
-  signaturePublicKey: string().required(),
   psiPublicKeysLink: string().required(),
-  signingKey: string().required(),
   passwordSalt: string().optional().default(undefined),
   passwordHash: string().optional().default(undefined),
   authPublicKey: string().optional().default(undefined),
@@ -29,9 +27,17 @@ const createAccountSchema = object({
   bio: string().optional().default(undefined),
 });
 
+export type CreateAccountResponse =
+  | {
+      authToken: AuthTokenResponse;
+      signingKey: string;
+      verifyingKey: string;
+    }
+  | ErrorResponse;
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<AuthTokenResponse | ErrorResponse>
+  res: NextApiResponse<CreateAccountResponse>
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
@@ -57,9 +63,7 @@ export default async function handler(
     mockRef,
     displayName,
     encryptionPublicKey,
-    signaturePublicKey,
     psiPublicKeysLink,
-    signingKey,
     passwordSalt,
     passwordHash,
     authPublicKey,
@@ -100,15 +104,18 @@ export default async function handler(
   if (chipType !== ChipType.PERSON) {
     return res.status(400).json({ error: "Invalid iykRef" });
   }
-  const existingChipUser = await prisma.user.findUnique({
+
+  // Check that the chip key exists
+  const chipKey = await prisma.chipKey.findUnique({
     where: {
       chipId,
     },
   });
-  if (existingChipUser) {
-    return res.status(400).json({ error: "Card already registered" });
+  if (!chipKey) {
+    return res.status(400).json({ error: "Chip key not found" });
   }
 
+  // Check username has not been taken
   const existingUsername = await prisma.user.findUnique({
     where: {
       displayName,
@@ -132,13 +139,53 @@ export default async function handler(
     parsedTelegram = telegram.startsWith("@") ? telegram.slice(1) : telegram;
   }
 
-  // Create user
+  // Check if user is already created
+  const existingChipUser = await prisma.user.findUnique({
+    where: {
+      chipId,
+    },
+  });
+  // If user is created and registered, return error
+  if (existingChipUser && existingChipUser.isRegistered) {
+    return res.status(400).json({ error: "Card already registered" });
+  } else if (existingChipUser) {
+    // If user is created but not registered, update user
+    const updatedUser = await prisma.user.update({
+      where: {
+        chipId,
+      },
+      data: {
+        isRegistered: true,
+        displayName,
+        encryptionPublicKey,
+        signaturePublicKey: chipKey.signaturePublicKey,
+        psiPublicKeysLink,
+        passwordSalt,
+        passwordHash,
+        authPublicKey,
+        twitter: parsedTwitter,
+        telegram: parsedTelegram,
+        bio,
+      },
+    });
+
+    const authTokenResponse = await generateAuthToken(updatedUser.id);
+
+    return res.status(200).json({
+      authToken: authTokenResponse,
+      signingKey: chipKey.signaturePrivateKey,
+      verifyingKey: chipKey.signaturePublicKey,
+    });
+  }
+
+  // If user is not created, create user
   const user = await prisma.user.create({
     data: {
       chipId,
+      isRegistered: true,
       displayName,
       encryptionPublicKey,
-      signaturePublicKey,
+      signaturePublicKey: chipKey.signaturePublicKey,
       psiPublicKeysLink,
       passwordSalt,
       passwordHash,
@@ -149,16 +196,11 @@ export default async function handler(
     },
   });
 
-  // Create chip key
-  await prisma.chipKey.create({
-    data: {
-      chipId,
-      signaturePublicKey,
-      signaturePrivateKey: signingKey,
-    },
-  });
-
   const authTokenResponse = await generateAuthToken(user.id);
 
-  return res.status(200).json(authTokenResponse);
+  return res.status(200).json({
+    authToken: authTokenResponse,
+    signingKey: chipKey.signaturePrivateKey,
+    verifyingKey: chipKey.signaturePublicKey,
+  });
 }
