@@ -68,6 +68,7 @@ export default function Tap() {
         signaturePublicKey: person.signaturePublicKey,
         signatureMessage: person.signatureMessage,
         signature: person.signature,
+        isSpeaker: person.isUserSpeaker,
         senderPrivateKey,
         recipientPublicKey: thisUserPublicKey,
       });
