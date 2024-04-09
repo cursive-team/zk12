@@ -26,6 +26,7 @@
     "bjj_ecdsa_nova_wasm": "file:public/bjj_ecdsa_nova_wasm",
     "circomlibjs": "^0.1.7",
     "clsx": "^2.1.0",
+    "comlink": "^4.4.1",
     "dayjs": "^1.11.10",
     "detectincognitojs": "^1.3.0",
     "idb": "^8.0.0",
