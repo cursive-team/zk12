@@ -106,7 +106,7 @@ export default function Register() {
     }
 
     if (telegram !== "@" && !telegramUsernameRegex.test(telegram)) {
-      toast.error("Please enter a valid Telegram username.");
+      toast.error("Please enter a valid Daimo username.");
       return;
     }
 
@@ -154,7 +154,7 @@ export default function Register() {
     }
 
     if (telegram !== "@" && !telegramUsernameRegex.test(telegram)) {
-      toast.error("Please enter a valid Telegram username.");
+      toast.error("Please enter a valid Daimo username.");
       return;
     }
 
@@ -397,7 +397,7 @@ export default function Register() {
   const StateContent: Record<DisplayState, JSX.Element> = {
     [DisplayState.PASSKEY]: (
       <FormStepLayout
-        title="Cursive NFC demo"
+        title="Cursive NFC Demo"
         subtitle="Set up socials to share when others tap your badge. Register to maintain an encrypted backup of data you collect."
         className="pt-4"
         onSubmit={handleSubmitWithPasskey}
@@ -413,7 +413,7 @@ export default function Register() {
         <Input
           type="text"
           id="twitter"
-          label="X"
+          label="Twitter"
           placeholder="@username"
           value={twitter}
           onChange={(e) =>
@@ -427,7 +427,7 @@ export default function Register() {
         <Input
           type="text"
           id="telegram"
-          label="Telegram"
+          label="Daimo"
           placeholder="@username"
           value={telegram}
           onChange={(e) =>

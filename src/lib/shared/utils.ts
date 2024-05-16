@@ -73,13 +73,13 @@ export function loadScript(url: string) {
 }
 
 // todo: add toObject to merkle proof
-export const merkleProofToObject = (proof: MerkleProof): Object => { 
+export const merkleProofToObject = (proof: MerkleProof): Object => {
   return {
     root: bigIntToHex(proof.root),
     pathIndices: proof.pathIndices,
     siblings: proof.siblings.map(bigIntToHex),
-  }
-}
+  };
+};
 
 // todo: add fromObject to merkle proof
 export const merkleProofFromObject = (obj: any): MerkleProof => {
@@ -87,13 +87,13 @@ export const merkleProofFromObject = (obj: any): MerkleProof => {
     root: hexToBigInt(obj.root),
     pathIndices: obj.pathIndices,
     siblings: obj.siblings.map(hexToBigInt),
-  }
-}
+  };
+};
 
 export const displayNameRegex = /^[a-zA-Z0-9]{1,20}$/;
 
 export const twitterUsernameRegex = /^@[a-zA-Z0-9_]{1,15}$/;
 
-export const telegramUsernameRegex = /^@[a-zA-Z0-9_]{5,32}$/;
+export const telegramUsernameRegex = /^@[a-zA-Z0-9_]{2,32}$/; // actually Daimo
 
 export const farcasterUsernameRegex = /^@[a-zA-Z0-9_.]{1,20}$/;

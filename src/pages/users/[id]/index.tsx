@@ -483,8 +483,11 @@ const UserProfilePage = () => {
               )}
               {(user.tg?.length ?? 0) > 1 && (
                 <LinkCard
-                  label="Telegram"
-                  href={`https://t.me/${removeLabelStartWith(user.tg, "@")}`}
+                  label="Daimo"
+                  href={`https://daimo.com/l/account/${removeLabelStartWith(
+                    user.tg,
+                    "@"
+                  )}`}
                   value={labelStartWith(user.tg, "@")}
                 />
               )}
