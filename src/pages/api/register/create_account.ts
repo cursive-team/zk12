@@ -152,7 +152,7 @@ export default async function handler(
   // If user is created and registered, return error
   if (existingChipUser && existingChipUser?.isRegistered) {
     return res.status(400).json({ error: "Card already registered" });
-  } else if (existingChipUser) {
+  } else if (existingChipUser && chipId) {
     // If user is created but not registered, update user
     const updatedUser = await prisma.user.update({
       where: {
