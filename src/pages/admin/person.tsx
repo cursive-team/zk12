@@ -48,7 +48,9 @@ const AdminTapPersonPage = () => {
               return (
                 <div
                   key={index}
-                  onClick={() => handleTapPerson(chipId)}
+                  onClick={() => {
+                    if (chipId) handleTapPerson(chipId);
+                  }}
                   className="flex justify-between border-b w-full border-gray-300  last-of-type:border-none first-of-type:pt-0 py-1"
                 >
                   <div className="flex items-center gap-2">

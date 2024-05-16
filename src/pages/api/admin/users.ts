@@ -6,7 +6,7 @@ import { isUserAdmin } from "@/lib/server/admin";
 export type AdminUserInfo = {
   id: number;
   displayName: string;
-  chipId: string;
+  chipId: string | null;
 };
 
 export default async function handler(
