@@ -178,25 +178,17 @@ export default function Tap() {
       return mockRef ? `&mockRef=${mockRef}` : "";
     };
 
-    const handlePersonRegistration = (
-      iykRef: string,
-      mockRef: string | undefined
-    ) => {
+    const handlePersonRegistration = (chipId: string) => {
       const authToken = getAuthToken();
       if (authToken) {
         router.push(`/friend_not_registered`);
         return;
       }
-      router.push(`/register?iykRef=${iykRef}${getMockRefUrlParam(mockRef)}`);
+      router.push(`/register?chipId=${chipId}`);
     };
 
-    const handleLocationRegistration = (
-      iykRef: string,
-      mockRef: string | undefined
-    ) => {
-      router.push(
-        `/register_location?iykRef=${iykRef}${getMockRefUrlParam(mockRef)}`
-      );
+    const handleLocationRegistration = (chipId: string) => {
+      router.push(`/register_location?chipId=${chipId}`);
     };
 
     const handleSigCardLocationRegistration = (signaturePublicKey: string) => {
@@ -226,9 +218,8 @@ export default function Tap() {
     };
 
     // ----- HANDLE CMAC TAP -----
-    const iykRef = router.query.iykRef as string;
-    const mockRef = router.query.mockRef as string | undefined;
-    if (!iykRef) {
+    const chipId = router.query.chipId as string;
+    if (!chipId) {
       toast.error("Invalid tap! Please try again.");
       router.push("/");
       return;
@@ -236,7 +227,7 @@ export default function Tap() {
 
     logClientEvent("tapProcessNewTap", {});
 
-    fetch(`/api/tap/cmac?iykRef=${iykRef}${getMockRefUrlParam(mockRef)}`, {
+    fetch(`/api/tap/plain?chipId=${chipId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -254,11 +245,11 @@ export default function Tap() {
             throw new Error("CMAC invalid!");
           case TapResponseCode.PERSON_NOT_REGISTERED:
             logClientEvent("tapPersonNotRegistered", {});
-            handlePersonRegistration(iykRef, mockRef);
+            handlePersonRegistration(chipId);
             break;
           case TapResponseCode.LOCATION_NOT_REGISTERED:
             logClientEvent("tapLocationNotRegistered", {});
-            handleLocationRegistration(iykRef, mockRef);
+            handleLocationRegistration(chipId);
             break;
           case TapResponseCode.VALID_PERSON:
             logClientEvent("tapValidPerson", {});

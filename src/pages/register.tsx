@@ -502,7 +502,7 @@ export default function Register() {
           <div className="flex flex-col gap-2 m-4">
             <Description>
               <span>
-                Tap other people's NFC rings to connect and{" "}
+                Tap other people{"'"}s NFC rings to connect and{" "}
                 <Underline>receive socials</Underline>.
               </span>
             </Description>
@@ -514,16 +514,19 @@ export default function Register() {
             </Description>
             <Description>
               <span>
-                Make <Underline>ZK proofs</Underline> about the people you've
-                met using your collected sigs.
+                Make <Underline>ZK proofs</Underline> about the people you{"'"}
+                ve met using your collected sigs.
               </span>
             </Description>
             <Description>
               <span>
                 {" "}
                 Use 2PC+FHE to{" "}
-                <Underline> discover who you've met in common</Underline> with
-                others.
+                <Underline>
+                  {" "}
+                  discover who you{"'"}ve met in common
+                </Underline>{" "}
+                with others.
               </span>
             </Description>
           </div>
