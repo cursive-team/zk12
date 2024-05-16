@@ -395,7 +395,7 @@ export default function Social() {
         authToken.expiresAt < new Date()
       ) {
         setLoading(false);
-        router.push("/login");
+        router.push("/register");
         return;
       }
 

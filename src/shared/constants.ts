@@ -1,5 +1,5 @@
 export const APP_CONFIG = {
-  APP_NAME: "Cursive @ SigSing",
+  APP_NAME: "Cursive NFC Demo",
   SUPPORT_EMAIL: "hello@cursive.team",
 };
 

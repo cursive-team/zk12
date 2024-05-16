@@ -3,14 +3,14 @@ import { Html, Head, Main, NextScript } from "next/document";
 export default function Document() {
   return (
     <Html lang="en">
-      <title>Cursive @ SigSing</title>
+      <title>Cursive NFC Demo</title>
       <Head>
         <meta
           name="description"
           content="Tap NFC cards at the SigSing residency to verifiably digitize your in-person experience."
           key="desc"
         />
-        <meta property="og:title" content="Cursive @ SigSing" />
+        <meta property="og:title" content="Cursive NFC Demo" />
         <meta
           property="og:description"
           content="Tap NFC cards at the SigSing residency to verifiably digitize your in-person experience."

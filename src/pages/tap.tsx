@@ -46,7 +46,7 @@ export default function Tap() {
 
       if (!authToken || authToken.expiresAt < new Date() || !profile || !keys) {
         toast.error("You must be logged in to connect");
-        router.push("/login");
+        router.push("/register");
         return;
       }
 
@@ -122,7 +122,7 @@ export default function Tap() {
 
       if (!authToken || authToken.expiresAt < new Date() || !profile || !keys) {
         toast.error("You must be logged in to connect");
-        router.push("/login");
+        router.push("/register");
         return;
       }
 
@@ -199,7 +199,7 @@ export default function Tap() {
       const authToken = getAuthToken();
       if (!authToken || authToken.expiresAt < new Date()) {
         // If user is not logged in, redirect to login
-        router.push("/login");
+        router.push("/register");
         // setPendingPersonTapResponse(person);
       } else {
         processPersonTap(person);
@@ -210,7 +210,7 @@ export default function Tap() {
       const authToken = getAuthToken();
       if (!authToken || authToken.expiresAt < new Date()) {
         // If user is not logged in, redirect to login
-        router.push("/login");
+        router.push("/register");
         // setPendingLocationTapResponse(location);
       } else {
         processLocationTap(location);
