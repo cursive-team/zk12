@@ -2,7 +2,7 @@ import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/router";
 import { v4 as uuidv4 } from "uuid";
 import { generateEncryptionKeyPair } from "@/lib/client/encryption";
-import { sign } from "@/lib/shared/signature";
+import { generateSignatureKeyPair, sign } from "@/lib/shared/signature";
 import { generateSalt, hashPassword } from "@/lib/client/utils";
 import {
   createBackup,
@@ -56,23 +56,15 @@ export default function Register() {
   const [bio, setBio] = useState<string>();
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [iykRef, setIykRef] = useState<string>("");
-  const [mockRef, setMockRef] = useState<string>();
+  const [chipId, setChipId] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [isAccountReady, setIsAccountReady] = useState(false);
 
   const { work } = useWorker();
 
   useEffect(() => {
-    if (router.query.iykRef) {
-      setIykRef(router.query.iykRef as string);
-    } else {
-      toast.error("Please tap your card to link it to your account.");
-      return;
-    }
-
-    if (router.query.mockRef) {
-      setMockRef(router.query.mockRef as string);
+    if (router.query.chipId) {
+      setChipId(router.query.chipId as string);
     }
   }, [router.query]);
 
@@ -96,11 +88,6 @@ export default function Register() {
 
   const handleCreateWithPassword = async () => {
     logClientEvent("registerAttemptCreateWithPassword", {});
-
-    if (!iykRef) {
-      toast.error("Please tap your card to link it to your account.");
-      return;
-    }
 
     if (
       !displayName ||
@@ -150,11 +137,6 @@ export default function Register() {
 
     logClientEvent("registerAttemptSubmitWithPasskey", {});
 
-    if (!iykRef) {
-      toast.error("Please tap your card to link it to your account.");
-      return;
-    }
-
     if (
       !displayName ||
       /^\s|\s$/.test(displayName) ||
@@ -192,7 +174,7 @@ export default function Register() {
     }
 
     const registrationOptions = await generateRegistrationOptions({
-      rpName: "zk-summit",
+      rpName: "sig-sing-workshop",
       rpID: window.location.hostname,
       userID: displayName,
       userName: displayName,
@@ -253,6 +235,10 @@ export default function Register() {
 
     const { privateKey, publicKey } = await generateEncryptionKeyPair();
     const { psiPrivateKeys, psiPublicKeys } = await generatePSIKeys();
+    const {
+      signingKey: signaturePrivateKey,
+      verifyingKey: signaturePublicKey,
+    } = generateSignatureKeyPair();
 
     // upload psi keys to blob
     const psiPublicKeysLink = await psiBlobUploadClient(
@@ -281,10 +267,11 @@ export default function Register() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        iykRef,
-        mockRef,
+        chipId,
         displayName,
         encryptionPublicKey: publicKey,
+        signaturePublicKey,
+        signaturePrivateKey,
         psiPublicKeysLink,
         passwordSalt,
         passwordHash,
@@ -410,7 +397,7 @@ export default function Register() {
   const StateContent: Record<DisplayState, JSX.Element> = {
     [DisplayState.PASSKEY]: (
       <FormStepLayout
-        title="zkSummit 11 x Cursive"
+        title="Cursive NFC demo"
         subtitle="Set up socials to share when others tap your badge. Register to maintain an encrypted backup of data you collect."
         className="pt-4"
         onSubmit={handleSubmitWithPasskey}
@@ -472,7 +459,7 @@ export default function Register() {
     ),
     [DisplayState.PASSWORD]: (
       <FormStepLayout
-        title="zkSummit 11 x Cursive"
+        title="Cursive NFC demo"
         subtitle="Choose a master password to maintain an encrypted backup of data you collect."
         className="pt-4"
         onSubmit={handleSubmitWithPassword}
@@ -515,9 +502,8 @@ export default function Register() {
           <div className="flex flex-col gap-2 m-4">
             <Description>
               <span>
-                Tap other badges to <Underline>receive socials</Underline>. Tap
-                talk posters to get{" "}
-                <Underline>slides and decriptions.</Underline>
+                Tap other people's NFC rings to connect and{" "}
+                <Underline>receive socials</Underline>.
               </span>
             </Description>
             <Description>
@@ -528,17 +514,16 @@ export default function Register() {
             </Description>
             <Description>
               <span>
-                Make <Underline>ZK proofs</Underline> about your ZK11 experience
-                to <Underline>share on Twitter</Underline> using your collected
-                sigs.
+                Make <Underline>ZK proofs</Underline> about the people you've
+                met using your collected sigs.
               </span>
             </Description>
             <Description>
               <span>
                 {" "}
                 Use 2PC+FHE to{" "}
-                <Underline> discover what you have in common</Underline> with
-                other attendees.
+                <Underline> discover who you've met in common</Underline> with
+                others.
               </span>
             </Description>
           </div>

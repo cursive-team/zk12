@@ -264,14 +264,14 @@ const CompleteQuestModal = ({
                 </span>
               </QRCodeWrapper>
               <Button onClick={copyProofLink}>Copy link to proof</Button>
-              <Link href={twitterShareUrl} target="_blank">
+              {/* <Link href={twitterShareUrl} target="_blank">
                 <Button
                   variant="transparent"
                   icon={<Icons.Twitter className="text-primary mr-2" />}
                 >
                   Share on Twitter
                 </Button>
-              </Link>
+              </Link> */}
             </div>
           </div>
         );

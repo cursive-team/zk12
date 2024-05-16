@@ -144,7 +144,7 @@ const LoginStepCode = ({
       <AppBackHeader onBackClick={onBack} />
       <FormStepLayout
         title="Login"
-        description="Welcome to ZKSummit"
+        description="Welcome to SigSing"
         onSubmit={handleSubmit(onSubmit)}
         className="!pt-0"
       >

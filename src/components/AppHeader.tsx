@@ -108,13 +108,13 @@ const AppHeaderContent = ({
           <ContentWrapper>
             <Title>About the app</Title>
             <Description>
-              This app allows you to verifiably digitize your ZK Summit
-              experience and make provable claims about the things you do at the
-              event. Every single tap gives you a digital signature representing
-              the fact that you either met someone or attended a talk. You can
-              make zk proofs about these signatures, like proving that you met 3
-              ZK Summit speakers without revealing who they were or the
-              signatures themselves.
+              This app allows you to verifiably digitize your Signature
+              Signularity residency experience and make provable claims about
+              the people you have met. Every single tap gives you a digital
+              signature representing the fact that you met someone. You can make
+              zk proofs about these signatures, like proving that you met 3
+              residents without revealing who they were or the signatures
+              themselves.
             </Description>
             <Description>
               Crucially, all the data you collect in this app is yours - our

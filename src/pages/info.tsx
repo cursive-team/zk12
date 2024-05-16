@@ -41,7 +41,7 @@ export default function Info() {
             <span>
               Learn more about what you can do and the tech involved{" "}
               <a
-                href="https://github.com/cursive-team/zk-summit"
+                href="https://github.com/cursive-team/sig-sing-workshop"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary"

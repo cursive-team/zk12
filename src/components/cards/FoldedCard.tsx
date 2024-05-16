@@ -1,15 +1,15 @@
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Controller, EffectFade, Pagination, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/effect-fade';
-import 'swiper/css/pagination';
-import { classed } from '@tw-classed/react';
-import { Card } from './Card';
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { cn } from '@/lib/client/utils';
-import { Icons } from '../Icons';
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Controller, EffectFade, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/effect-fade";
+import "swiper/css/pagination";
+import { classed } from "@tw-classed/react";
+import { Card } from "./Card";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { cn } from "@/lib/client/utils";
+import { Icons } from "../Icons";
 import {
   getAuthToken,
   getFoldedProof,
@@ -17,22 +17,22 @@ import {
   getLocationSignatures,
   getProfile,
   getUsers,
-} from '@/lib/client/localStorage';
-import { Button } from '../Button';
-import Link from 'next/link';
-import { logClientEvent } from '@/lib/client/metrics';
-import { toast } from 'sonner';
-import { type PutBlobResult } from '@vercel/blob';
-import { upload } from '@vercel/blob/client';
-import { encryptFoldedProofMessage } from '@/lib/client/jubSignal';
-import { loadMessages } from '@/lib/client/jubSignalClient';
-import { useWorker } from '@/hooks/useWorker';
-import { IndexDBWrapper, TreeType } from '@/lib/client/indexDB';
-import { Spinner } from '../Spinner';
+} from "@/lib/client/localStorage";
+import { Button } from "../Button";
+import Link from "next/link";
+import { logClientEvent } from "@/lib/client/metrics";
+import { toast } from "sonner";
+import { type PutBlobResult } from "@vercel/blob";
+import { upload } from "@vercel/blob/client";
+import { encryptFoldedProofMessage } from "@/lib/client/jubSignal";
+import { loadMessages } from "@/lib/client/jubSignalClient";
+import { useWorker } from "@/hooks/useWorker";
+import { IndexDBWrapper, TreeType } from "@/lib/client/indexDB";
+import { Spinner } from "../Spinner";
 
 dayjs.extend(duration);
-const UNFOLDED_DATE = '2024-04-10 15:59:59';
-const CountdownLabel = classed.span('text-primary font-semibold text-xs');
+const UNFOLDED_DATE = "2024-04-10 15:59:59";
+const CountdownLabel = classed.span("text-primary font-semibold text-xs");
 
 interface FoldedItemProps {
   image?: string;
@@ -58,13 +58,13 @@ export type ProofPost = {
   talks: ProofData | undefined;
 };
 
-export const FOLDED_MOCKS: FolderCardProps['items'] = [
+export const FOLDED_MOCKS: FolderCardProps["items"] = [
   {
-    image: '/bg-gradient-card.png',
+    image: "/bg-gradient-card.png",
     children: (
       <>
         <Icons.ZKFolded
-          className='text-primary w-full'
+          className="text-primary w-full"
           height={100}
           width={100}
         />
@@ -72,25 +72,21 @@ export const FOLDED_MOCKS: FolderCardProps['items'] = [
     ),
   },
   {
-    subtitle: "We're so happy you joined us at ZK Summit 11!",
-    description: () => 'Ready to review your memories?',
+    subtitle:
+      "We're so happy you joined us at the Signature Singularity Residency!",
+    description: () => "Ready to review your memories?",
   },
   {
-    title: 'ZK11 - a symposium for brilliant minds.',
-    description: (param: number) =>
-      `You connected with ${param} other attendees`,
+    title: "SigSing - a symposium for brilliant minds.",
+    description: (param: number) => `You connected with ${param} residents`,
   },
   {
-    title: '47 speakers filled the academy for a full day of talks.',
-    description: (param: number) => `You attended ${param} talks`,
-  },
-  {
-    title: 'Dialogue catalyzed the evolution of zk research.',
+    title: "Dialogue catalyzed the evolution of zk research.",
     description: (param: number) => `You met ${param} speakers`,
   },
   {
-    title: 'Knowledge blossomed through interaction.',
-    description: () => `You were 1 of 500 at ZK11!`,
+    title: "Knowledge blossomed through interaction.",
+    description: () => `You are 1 of 1!`,
   },
 ];
 
@@ -121,42 +117,41 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
       setNumSpeakersFolded(speakerFold ? speakerFold.numFolds : 0);
       const talkFold = await db.getFold(TreeType.Talk);
       setNumTalksFolded(talkFold ? talkFold.numFolds : 0);
-    })()
+    })();
     const users = getUsers();
     const talks = getLocationSignatures();
     // const foldedProof = getFoldedProof();
 
     const userSignatures = Object.values(users).filter((user) => user.sig);
     setNumAttendees(
-      userSignatures.filter((user) => !user.isSpeaker && user.pkId !== '0')
+      userSignatures.filter((user) => !user.isSpeaker && user.pkId !== "0")
         .length
     );
     setNumSpeakers(userSignatures.filter((user) => user.isSpeaker).length);
     setNumTalks(Object.keys(talks).length);
-
   }, []);
 
   const pagination = {
     clickable: true,
-    bulletActiveClass: 'folded-dot-active',
+    bulletActiveClass: "folded-dot-active",
     renderBullet: (index: number, className: string) => {
       return `<div data-index="${index}" class="my-2 folded-dot ${className}"></div>`;
     },
   };
 
   const getLinkToProof = () => {
-    if (!proofId) return '';
+    if (!proofId) return "";
 
     return `/folded/${proofId}`;
   };
 
   const getTwitterShareUrl = () => {
-    if (!proofId) return '';
+    if (!proofId) return "";
 
     return `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      `🧺 zkSummit 11 FOLDED 🧺: I made a Nova folding proof attesting to my zkSummit Athens experience, built by @cursive_team and @mach34_. Go verify it yourself!`
+      `🧺 I made a Nova folding proof attesting to the people I met at the Signature Singularity Residency, built by @cursive_team! 🧺`
     )}&url=${encodeURIComponent(
-      `https://zksummit.cursive.team/folded/${proofId}`
+      `https://ring.cursive.team/folded/${proofId}`
     )}`;
   };
 
@@ -173,8 +168,8 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
   ): Promise<string> => {
     const name = `${treeType}Proof`;
     const newBlob: PutBlobResult = await upload(name, proof, {
-      access: 'public',
-      handleUploadUrl: '/api/folding/upload',
+      access: "public",
+      handleUploadUrl: "/api/folding/upload",
     });
     return newBlob.url;
   };
@@ -184,19 +179,19 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
     const keys = getKeys();
     const profile = getProfile();
     if (!token || token.expiresAt < new Date() || !keys || !profile) {
-      throw new Error('Please sign in to save your proof.');
+      throw new Error("Please sign in to save your proof.");
     }
 
-    const response = await fetch('/api/folding/proof', {
-      method: 'POST',
+    const response = await fetch("/api/folding/proof", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ authToken: token.value, data }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to save proof');
+      throw new Error("Failed to save proof");
     }
 
     const { proofUuid } = await response.json();
@@ -224,10 +219,10 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
       });
     } catch (error) {
       console.error(
-        'Error sending encrypted folded proof info to server: ',
+        "Error sending encrypted folded proof info to server: ",
         error
       );
-      toast.error('An error occured while saving the proof. Please try again.');
+      toast.error("An error occured while saving the proof. Please try again.");
     }
 
     return proofUuid;
@@ -237,10 +232,10 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
   const beginProving = async (regenerate: boolean) => {
     if (provingStarted) return true;
     setProofId(undefined);
-    logClientEvent('foldedProvingStarted', {});
+    logClientEvent("foldedProvingStarted", {});
 
     if (numAttendees === 0 && numTalks === 0 && numSpeakers === 0) {
-      toast.error('Nothing to prove! Tap some cards to get started.');
+      toast.error("Nothing to prove! Tap some cards to get started.");
       return;
     }
     setProvingStarted(true);
@@ -270,7 +265,7 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
         console.log(`No membership proof of type ${treeType} was ever made`);
         return;
       }
-      console.log('Finalized proof for treeType: ', treeType);
+      console.log("Finalized proof for treeType: ", treeType);
       // get the proof from the db
       const proofData = await db.getFold(treeType);
       if (proofData === undefined) {
@@ -306,7 +301,7 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
 
   const progress = useMemo(() => {
     let progressPercent = 0;
-    let progressText = '';
+    let progressText = "";
     console.log("numAttendees", numAttendees);
     console.log("numFoldedAttendees", numAttendeesFolded);
     if (numParamsDownloaded < 10) {
@@ -328,8 +323,8 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
 
     return (
       <div>
-        <div className='mb-2'>{progressText}</div>
-        <div className='relative'>
+        <div className="mb-2">{progressText}</div>
+        <div className="relative">
           <Card.Progress
             style={{
               width: `${!isNaN(progressPercent) ? progressPercent * 100 : 0}%`,
@@ -361,45 +356,45 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
     if (!worker) return;
     worker.onmessage = async (event) => {
       const { updateType } = event.data;
-      if (updateType === 'paramDownloaded') {
+      if (updateType === "paramDownloaded") {
         setNumParamsDownloaded((prev) => prev + 1);
-      } else if (updateType === 'attendeeFolded') {
+      } else if (updateType === "attendeeFolded") {
         setNumAttendeesFolded((prev) => prev + 1);
-      } else if (updateType === 'speakerFolded') {
+      } else if (updateType === "speakerFolded") {
         setNumSpeakersFolded((prev) => prev + 1);
-      } else if (updateType === 'talkFolded') {
+      } else if (updateType === "talkFolded") {
         setNumTalksFolded((prev) => prev + 1);
       }
     };
   }, [worker]);
 
   return (
-    <main className='relative'>
+    <main className="relative">
       <Icons.Cursive
-        className='fixed top-[47px] left-[22px] text-primary z-10'
+        className="fixed top-[47px] left-[22px] text-primary z-10"
         height={19}
         width={63}
       />
-      <div className='fixed flex items-center gap-8 right-[22px] top-[47px] z-10'>
+      <div className="fixed flex items-center gap-8 right-[22px] top-[47px] z-10">
         <button
-          aria-label='close'
-          type='button'
-          className='size-[18x] rounded-full bg-white/60 p-1'
+          aria-label="close"
+          type="button"
+          className="size-[18x] rounded-full bg-white/60 p-1"
           onClick={() => onClose?.()}
         >
-          <Icons.ControllerClose className='text-iron-950' />
+          <Icons.ControllerClose className="text-iron-950" />
         </button>
       </div>
       <Swiper
         pagination={pagination}
         modules={[EffectFade, Controller, Pagination, Autoplay]}
-        effect='fade'
+        effect="fade"
         autoplay={{
           delay: 2500,
           disableOnInteraction: false,
           stopOnLastSlide: true,
         }}
-        className='h-screen'
+        className="h-screen"
         spaceBetween={0}
         slidesPerView={1}
         onSlideChange={(swiper: any) => {
@@ -415,28 +410,28 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
             return (
               <SwiperSlide
                 key={itemIndex}
-                className={cn(!!image ? 'bg-cover bg-center' : 'bg-main')}
+                className={cn(!!image ? "bg-cover bg-center" : "bg-main")}
                 style={{
                   backgroundImage: image ? `url('${image}')` : undefined,
-                  backgroundSize: image ? 'cover' : undefined,
+                  backgroundSize: image ? "cover" : undefined,
                 }}
               >
-                <div className='flex flex-col gap-6 grow h-screen items-center justify-center px-10'>
+                <div className="flex flex-col gap-6 grow h-screen items-center justify-center px-10">
                   {itemIndex !== items.length - 1 && (
                     <>
                       {children}
                       {title && (
-                        <h4 className='text-primary leading-[32px] font-medium font-sans text-3xl text-center'>
+                        <h4 className="text-primary leading-[32px] font-medium font-sans text-3xl text-center">
                           {title}
                         </h4>
                       )}
                       {subtitle && (
-                        <span className='text-primary font-bold font-sans text-lg text-center'>
+                        <span className="text-primary font-bold font-sans text-lg text-center">
                           {subtitle}
                         </span>
                       )}
                       {description && (
-                        <span className='text-primary font-normal font-sans text-base text-center'>
+                        <span className="text-primary font-normal font-sans text-base text-center">
                           {itemIndex === 2 && description(numAttendees)}
                           {itemIndex === 3 && description(numTalks)}
                           {itemIndex === 4 && description(numSpeakers)}
@@ -449,25 +444,25 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
                     <>
                       {proofId && (
                         <>
-                          <h4 className='text-primary leading-[32px] font-medium font-sans text-3xl text-center'>
-                            {'Proof is ready'}
+                          <h4 className="text-primary leading-[32px] font-medium font-sans text-3xl text-center">
+                            {"Proof is ready"}
                           </h4>
-                          <span className='text-primary font-bold font-sans text-lg text-center'>
+                          <span className="text-primary font-bold font-sans text-lg text-center">
                             {
-                              'Allow anyone to verify your ZK Summit experience.'
+                              "Allow anyone to verify your residency experience."
                             }
                           </span>
-                          <Link href={getLinkToProof()} target='_blank'>
+                          <Link href={getLinkToProof()} target="_blank">
                             <Button
                               onClick={() =>
-                                logClientEvent('foldedLinkViewProof', {})
+                                logClientEvent("foldedLinkViewProof", {})
                               }
-                              variant='white'
+                              variant="white"
                             >
-                              {'View Proof'}
+                              {"View Proof"}
                             </Button>
                           </Link>
-                          <Link href=''>
+                          <Link href="">
                             <Button
                               onClick={() => {
                                 setNumAttendeesFolded(0);
@@ -475,32 +470,32 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
                                 setNumTalksFolded(0);
                                 beginProving(true);
                               }}
-                              variant='white'
+                              variant="white"
                             >
-                              {'Regenerate Proof From Scratch'}
+                              {"Regenerate Proof From Scratch"}
                             </Button>
                           </Link>
-                          <Link href={getTwitterShareUrl()} target='_blank'>
+                          <Link href={getTwitterShareUrl()} target="_blank">
                             <Button
                               onClick={() =>
-                                logClientEvent('foldedTwitterShareProof', {})
+                                logClientEvent("foldedTwitterShareProof", {})
                               }
                               icon={
-                                <Icons.Twitter className='text-primary bg-white mr-3' />
+                                <Icons.Twitter className="text-primary bg-white mr-3" />
                               }
                             >
-                              {'Share on Twitter'}
+                              {"Share on Twitter"}
                             </Button>
                           </Link>
                         </>
                       )}
                       {!proofId && provingStarted && (
                         <>
-                          <h4 className='text-primary leading-[32px] font-medium font-sans text-3xl text-center'>
-                            {'Generating your proof...'}
+                          <h4 className="text-primary leading-[32px] font-medium font-sans text-3xl text-center">
+                            {"Generating your proof..."}
                           </h4>
-                          <span className='text-primary font-bold font-sans text-lg text-center'>
-                            {'This may take a minute. Please be patient!'}
+                          <span className="text-primary font-bold font-sans text-lg text-center">
+                            {"This may take a minute. Please be patient!"}
                           </span>
                           <Spinner />
                           {progress}
@@ -510,17 +505,17 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
                         <>
                           {children}
                           {title && (
-                            <h4 className='text-primary leading-[32px] font-medium font-sans text-3xl text-center'>
+                            <h4 className="text-primary leading-[32px] font-medium font-sans text-3xl text-center">
                               {title}
                             </h4>
                           )}
                           {subtitle && (
-                            <span className='text-primary font-bold font-sans text-lg text-center'>
+                            <span className="text-primary font-bold font-sans text-lg text-center">
                               {subtitle}
                             </span>
                           )}
                           {description && (
-                            <span className='text-primary font-normal font-sans text-base text-center'>
+                            <span className="text-primary font-normal font-sans text-base text-center">
                               {itemIndex === 2 && description(numAttendees)}
                               {itemIndex === 3 && description(numTalks)}
                               {itemIndex === 4 && description(numSpeakers)}
@@ -581,8 +576,8 @@ export const FolderCard = ({ items }: FolderCardProps) => {
     <div>
       <div
         className={cn(
-          'fixed inset-0 bg-main duration-300',
-          isOpened ? 'z-[100] opacity-100' : 'z-[-10] opacity-0',
+          "fixed inset-0 bg-main duration-300",
+          isOpened ? "z-[100] opacity-100" : "z-[-10] opacity-0",
           {}
         )}
       >
@@ -594,36 +589,37 @@ export const FolderCard = ({ items }: FolderCardProps) => {
         />
       </div>
       <Card.Base
-        aria-label='Folded Card'
+        aria-label="Folded Card"
         onClick={() => setIsOpened(!isOpened)}
         className={cn({
-          'pointer-events-none': hasCountdown,
-          'py-4': !hasCountdown,
+          "pointer-events-none": hasCountdown,
+          "py-4": !hasCountdown,
         })}
         style={{
           backgroundImage: "url('/bg-glitter.png')",
         }}
       >
-        <div className='flex flex-col gap-2 text-center pt-4 pb-4 px-6 '>
+        <div className="flex flex-col gap-2 text-center pt-4 pb-4 px-6 ">
           {hasCountdown && (
             <CountdownLabel>
-              Available in:{' '}
+              Available in:{" "}
               {days === 1
                 ? `${days} day, `
                 : days === 0
-                ? ''
+                ? ""
                 : `${days} days, `}
-              {hours.toString().padStart(2, '0')}:
-              {minutes.toString().padStart(2, '0')}:
-              {seconds.toString().padStart(2, '0')}
+              {hours.toString().padStart(2, "0")}:
+              {minutes.toString().padStart(2, "0")}:
+              {seconds.toString().padStart(2, "0")}
             </CountdownLabel>
           )}
-          <h3 className='font-bold font-sans text-[21px] text-black'>
-            ZK11 Folded
+          <h3 className="font-bold font-sans text-[21px] text-black">
+            SigSing Folded
           </h3>
-          <span className='text-xs text-iron-900'>
+          <span className="text-xs text-iron-900">
             Using client-side Nova folding proofs, create and share a Spotify
-            Wrapped-like summary of your zkSummit11!
+            Wrapped-like summary of who you met at the Signature Singularity
+            Residency!
           </span>
         </div>
       </Card.Base>

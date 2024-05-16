@@ -14,10 +14,12 @@ import {
 } from "@/lib/server/iyk";
 
 const createAccountSchema = object({
-  iykRef: string().required(),
+  chipId: string().optional().default(undefined),
   mockRef: string().optional().default(undefined),
   displayName: string().trim().required(),
   encryptionPublicKey: string().required(),
+  signaturePublicKey: string().optional().default(undefined),
+  signaturePrivateKey: string().optional().default(undefined),
   psiPublicKeysLink: string().required(),
   passwordSalt: string().optional().default(undefined),
   passwordHash: string().optional().default(undefined),
@@ -60,10 +62,12 @@ export default async function handler(
   }
 
   const {
-    iykRef,
+    chipId,
     mockRef,
     displayName,
     encryptionPublicKey,
+    signaturePublicKey,
+    signaturePrivateKey,
     psiPublicKeysLink,
     passwordSalt,
     passwordHash,
@@ -94,26 +98,25 @@ export default async function handler(
       .json({ error: "Bio must be less than or equal to 200 characters" });
   }
 
-  // Validate iykRef corresponds to an unregistered person chip
-  const enableMockRef =
-    process.env.ALLOW_MOCK_REF === "true" && mockRef === "true";
-  const { chipId } = await getChipIdFromIykRef(iykRef, enableMockRef);
-  if (chipId === undefined) {
-    return res.status(400).json({ error: "Invalid iykRef" });
-  }
-  const chipType = await getChipTypeFromChipId(chipId, enableMockRef);
-  if (chipType !== ChipType.PERSON) {
-    return res.status(400).json({ error: "Invalid iykRef" });
-  }
-
-  // Check that the chip key exists
-  const chipKey = await prisma.chipKey.findUnique({
-    where: {
-      chipId,
-    },
-  });
-  if (!chipKey) {
-    return res.status(400).json({ error: "Chip key not found" });
+  let userSignaturePublicKey;
+  let userSignaturePrivateKey;
+  if (chipId) {
+    const chipKey = await prisma.chipKey.findUnique({
+      where: {
+        chipId,
+      },
+    });
+    if (!chipKey) {
+      return res.status(400).json({ error: "Chip key not found" });
+    }
+    userSignaturePublicKey = chipKey.signaturePublicKey;
+    userSignaturePrivateKey = chipKey.signaturePrivateKey;
+  } else {
+    if (!signaturePublicKey || !signaturePrivateKey) {
+      return res.status(400).json({ error: "Missing chip key" });
+    }
+    userSignaturePublicKey = signaturePublicKey;
+    userSignaturePrivateKey = signaturePrivateKey;
   }
 
   // Check username has not been taken
@@ -160,7 +163,7 @@ export default async function handler(
         isRegistered: true,
         displayName,
         encryptionPublicKey,
-        signaturePublicKey: chipKey.signaturePublicKey,
+        signaturePublicKey: userSignaturePublicKey,
         psiPublicKeysLink,
         passwordSalt,
         passwordHash,
@@ -175,8 +178,8 @@ export default async function handler(
 
     return res.status(200).json({
       authToken: authTokenResponse,
-      signingKey: chipKey.signaturePrivateKey,
-      verifyingKey: chipKey.signaturePublicKey,
+      signingKey: userSignaturePrivateKey,
+      verifyingKey: userSignaturePublicKey,
     });
   }
 
@@ -188,7 +191,7 @@ export default async function handler(
       isRegistered: true,
       displayName,
       encryptionPublicKey,
-      signaturePublicKey: chipKey.signaturePublicKey,
+      signaturePublicKey: userSignaturePublicKey,
       psiPublicKeysLink,
       passwordSalt,
       passwordHash,
@@ -203,7 +206,7 @@ export default async function handler(
 
   return res.status(200).json({
     authToken: authTokenResponse,
-    signingKey: chipKey.signaturePrivateKey,
-    verifyingKey: chipKey.signaturePublicKey,
+    signingKey: userSignaturePrivateKey,
+    verifyingKey: userSignaturePublicKey,
   });
 }

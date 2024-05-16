@@ -1,5 +1,5 @@
 export const APP_CONFIG = {
-  APP_NAME: "ZK Summit 11",
+  APP_NAME: "Cursive @ SigSing",
   SUPPORT_EMAIL: "hello@cursive.team",
 };
 
