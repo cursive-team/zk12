@@ -144,15 +144,23 @@ export default async function handler(
   }
 
   // Check if user is already created
-  const existingChipUser: any = await prisma.user.findUnique({
-    where: {
-      chipId,
-    },
-  });
+  let isExistingChipUser = false;
+  let isUserRegistered = false;
+  if (chipId) {
+    const existingChipUser: any = await prisma.user.findUnique({
+      where: {
+        chipId,
+      },
+    });
+    isExistingChipUser = !!existingChipUser;
+    if (isExistingChipUser) {
+      isUserRegistered = existingChipUser.isRegistered;
+    }
+  }
   // If user is created and registered, return error
-  if (existingChipUser && existingChipUser?.isRegistered) {
+  if (isExistingChipUser && isUserRegistered) {
     return res.status(400).json({ error: "Card already registered" });
-  } else if (existingChipUser && chipId) {
+  } else if (isExistingChipUser && chipId) {
     // If user is created but not registered, update user
     const updatedUser = await prisma.user.update({
       where: {
