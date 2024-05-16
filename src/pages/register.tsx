@@ -397,7 +397,7 @@ export default function Register() {
   const StateContent: Record<DisplayState, JSX.Element> = {
     [DisplayState.PASSKEY]: (
       <FormStepLayout
-        title="Cursive NFC demo"
+        title="Cursive NFC Demo"
         subtitle="Set up socials to share when others tap your badge. Register to maintain an encrypted backup of data you collect."
         className="pt-4"
         onSubmit={handleSubmitWithPasskey}
