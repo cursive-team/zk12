@@ -11,7 +11,6 @@ type CreateChipKeyData = {
 };
 
 type PrecreateUserData = {
-  id: number;
   chipId: string;
   isRegistered: boolean;
   isUserSpeaker: boolean;
@@ -87,7 +86,6 @@ export default async function handler(
         // Precreate user object
         const isUserSpeaker = chipData.isPersonSpeaker ? true : false;
         allUserData.push({
-          id: userIndex,
           chipId,
           isRegistered: false,
           isUserSpeaker,

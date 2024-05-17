@@ -285,7 +285,7 @@ export default function Social() {
           <div className="flex flex-col gap-4 mt-2">
             {activities.length === 1 && (
               <NoResultContent>
-                Get started by tapping badges and talk posters!
+                Get started by tapping badges and talk stickers!
               </NoResultContent>
             )}
             {activities.length > 1 &&
@@ -359,7 +359,7 @@ export default function Social() {
           <div className="flex flex-col gap-5 mt-2">
             {locations.length === 0 ? (
               <NoResultContent>
-                {"Tap talk posters to collect slide links and talk details!"}
+                {"Tap talk stickers to prove attendance and get talk details!"}
               </NoResultContent>
             ) : (
               <div className="flex flex-col gap-2 w-full">

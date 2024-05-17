@@ -11,7 +11,7 @@ export default function AdminTap() {
   const onTap = (event: FormEvent) => {
     event.preventDefault();
 
-    router.push(`/tap?iykRef=${chipId}&mockRef=true`);
+    router.push(`/tap?chipId=${chipId}`);
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
