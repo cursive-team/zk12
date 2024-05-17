@@ -195,7 +195,7 @@ const UserProfilePage = () => {
     } else if (payload.state === PSIState.ROUND3 && payload.to === selfEncPk) {
       setOtherRound3MessageLink(payload.data);
     }
-  }, [broadcastEvent, user?.pkId!]);
+  }, [broadcastEvent, user?.pkId, selfEncPk]);
 
   // process state changes
   useEffect(() => {
