@@ -72,16 +72,15 @@ export const FOLDED_MOCKS: FolderCardProps["items"] = [
     ),
   },
   {
-    subtitle:
-      "We're so happy you joined us at the Signature Singularity Residency!",
+    subtitle: "We're so happy you've tried out Backpocket!",
     description: () => "Ready to review your memories?",
   },
   {
-    title: "SigSing - a symposium for brilliant minds.",
+    title: "The MPC/FHE residency - a symposium for brilliant minds.",
     description: (param: number) => `You connected with ${param} residents`,
   },
   {
-    title: "Dialogue catalyzed the evolution of zk research.",
+    title: "Dialogue catalyzed the evolution of MPC/FHE research.",
     description: (param: number) => `You met ${param} speakers`,
   },
   {
@@ -614,12 +613,11 @@ export const FolderCard = ({ items }: FolderCardProps) => {
             </CountdownLabel>
           )}
           <h3 className="font-bold font-sans text-[21px] text-black">
-            SigSing Folded
+            Folded Experience
           </h3>
           <span className="text-xs text-iron-900">
             Using client-side Nova folding proofs, create and share a Spotify
-            Wrapped-like summary of who you met at the Signature Singularity
-            Residency!
+            Wrapped-like summary of who you've met and what you've done.
           </span>
         </div>
       </Card.Base>

@@ -285,7 +285,7 @@ export default function Social() {
           <div className="flex flex-col gap-4 mt-2">
             {activities.length === 1 && (
               <NoResultContent>
-                Get started by tapping badges and talk stickers!
+                Get started by tapping rings and NFC stickers!
               </NoResultContent>
             )}
             {activities.length > 1 &&
@@ -476,18 +476,16 @@ export default function Social() {
             </button>
           </div>
 
-          <div className="flex flex-col justify-between py-2">
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-col gap-2">
-                <h2 className="text-xl leading-6 tracking-[-0.2px] text-iron-950 font-bold">
-                  {profile?.displayName}
-                </h2>
-                <span className="text-sm font-normal text-iron-950">
-                  {numConnections === 1
-                    ? `1 contact`
-                    : `${numConnections} contacts`}
-                </span>
-              </div>
+          <div className="flex flex-col justify-center gap-4 py-2">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-xl leading-6 tracking-[-0.2px] text-iron-950 font-bold">
+                {profile?.displayName}
+              </h2>
+              <span className="text-sm font-normal text-iron-950">
+                {numConnections === 1
+                  ? `1 contact`
+                  : `${numConnections} contacts`}
+              </span>
             </div>
             <Link href="/leaderboard">
               <Button size="small" variant="tertiary">

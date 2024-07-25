@@ -9,9 +9,9 @@ import React, { useMemo, useRef, useState } from "react";
 import { QuestWithCompletion } from "@/types";
 import { getPinnedQuest } from "@/lib/client/localStorage/questPinned";
 import { useQuestRequirements } from "@/hooks/useQuestRequirements";
-import { FOLDED_MOCKS, FolderCard } from "@/components/cards/FoldedCard";
+import { Card } from "@/components/cards/Card";
 
-export default function QuestsPage() {
+export default function MPCPage() {
   const pinnedQuests = useRef<Set<number>>(getPinnedQuest());
   const { isLoading, data: allQuests = [] } = useFetchQuests();
 
@@ -42,51 +42,30 @@ export default function QuestsPage() {
   return (
     <div className="flex flex-col gap-4 pt-4">
       <span className="text-iron-600 font-sans text-xs">
-        Post proofs about your Backpocket experience on Twitter, while
-        preserving privacy over the people you met and talks you attended.
+        Discover connections with your social graph, using MPC for efficient
+        results while maintaining your data privacy.
       </span>
 
-      <LoadingWrapper
-        className="flex flex-col gap-4"
-        isLoading={isLoading}
-        fallback={<Placeholder.List items={3} />}
-        noResultsLabel="No proofs found"
-      >
-        <>
-          <FolderCard items={FOLDED_MOCKS} />
-          {displayQuests.map(
-            (
-              {
-                id,
-                name,
-                description,
-                userRequirements,
-                locationRequirements,
-                isCompleted = false,
-                userTapReq,
-              }: QuestWithCompletion,
-              index
-            ) => {
-              const key = `${id}-${index}`;
-
-              return (
-                <Link href={`/proofs/${id}`} key={key}>
-                  <QuestCard
-                    title={name}
-                    description={description}
-                    userTapReqCount={userTapReq ? 1 : 0}
-                    completedReqs={numRequirementsSatisfied[index]}
-                    userRequirements={userRequirements}
-                    locationRequirements={locationRequirements}
-                    isCompleted={isCompleted}
-                    isPinned={pinnedQuests.current.has(id)}
-                  />
-                </Link>
-              );
-            }
-          )}
-        </>
-      </LoadingWrapper>
+      <>
+        <Link href={`/mpc/fruits`}>
+          <Card.Base className="flex flex-col gap-4 p-3">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2">
+                  <Card.Title className="text-iron-950 text-sm font-bold">
+                    🍎 Rate fruits
+                  </Card.Title>
+                  <span className="text-xs font-iron-600 font-sans">
+                    Rate some fruits with your friends, discover how aligned you
+                    are without revealing any specific votes. Votes happen in
+                    batches of 10.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card.Base>
+        </Link>
+      </>
     </div>
   );
 }
