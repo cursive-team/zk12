@@ -1,5 +1,4 @@
 import { Icons } from "@/components/Icons";
-import { ProfileImage } from "@/components/ProfileImage";
 import { TabsProps, Tabs } from "@/components/Tabs";
 import { Card } from "@/components/cards/Card";
 import { ListLayout } from "@/layouts/ListLayout";
@@ -322,7 +321,7 @@ export default function Social() {
           <div className="flex flex-col gap-5 mt-2">
             {contactUsersList.length === 0 && (
               <NoResultContent>
-                Tap badges to share socials and connect with others!
+                Tap rings to share socials and connect with others!
               </NoResultContent>
             )}
             {contactUsersList.length !== 0 &&

@@ -42,7 +42,7 @@ interface FoldedItemProps {
   description?: (param: number) => ReactNode;
 }
 
-interface FolderCardProps {
+interface FoldedCardProps {
   items: FoldedItemProps[];
   onClose?: () => void;
 }
@@ -58,30 +58,18 @@ export type ProofPost = {
   talks: ProofData | undefined;
 };
 
-export const FOLDED_MOCKS: FolderCardProps["items"] = [
+export const FOLDED_MOCKS: FoldedCardProps["items"] = [
   {
-    image: "/bg-gradient-card.png",
-    children: (
-      <>
-        <Icons.ZKFolded
-          className="text-primary w-full"
-          height={100}
-          width={100}
-        />
-      </>
-    ),
-  },
-  {
-    subtitle: "We're so happy you've tried out Backpocket!",
+    title: "We're so happy you've tried out Backpocket!",
     description: () => "Ready to review your memories?",
   },
   {
     title: "The MPC/FHE residency - a symposium for brilliant minds.",
-    description: (param: number) => `You connected with ${param} residents`,
+    description: (param: number) => `You connected with ${param} people`,
   },
   {
     title: "Dialogue catalyzed the evolution of MPC/FHE research.",
-    description: (param: number) => `You met ${param} speakers`,
+    description: (param: number) => `You met ${param} organizers`,
   },
   {
     title: "Knowledge blossomed through interaction.",
@@ -89,7 +77,7 @@ export const FOLDED_MOCKS: FolderCardProps["items"] = [
   },
 ];
 
-const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
+const FoldedCardSteps = ({ items = [], onClose }: FoldedCardProps) => {
   // const { foldingCompleted, progress, updateProgress } = useProgress();
   const { work, worker, finalize } = useWorker();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -539,7 +527,7 @@ const FoldedCardSteps = ({ items = [], onClose }: FolderCardProps) => {
   );
 };
 
-export const FolderCard = ({ items }: FolderCardProps) => {
+export const FoldedCard = ({ items }: FoldedCardProps) => {
   const [isOpened, setIsOpened] = useState(false);
   const [hasCountdown, setHasCountdown] = useState(false);
   const [countdown, setCountdown] = useState({
