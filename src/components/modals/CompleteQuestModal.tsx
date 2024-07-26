@@ -204,7 +204,7 @@ const CompleteQuestModal = ({
   };
 
   const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    `I am a verified ${quest.name} at zkSummit11. Here's my ZK proof:`
+    `I am a verified ${quest.name}. Here's my ZK proof:`
   )}&url=${encodeURIComponent(qrCodeUrl)}`;
 
   const getModalContent = (): JSX.Element => {
