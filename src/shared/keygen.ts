@@ -11,7 +11,61 @@ export type KeygenData = {
   talkEndTime?: string; // End time of the talk ex: 10:00
 };
 
-export const initialKeygenData: Record<string, KeygenData> = {
+export const keyUids = [
+  "0428728A376B80",
+  "04B86A8A376B80",
+  "047E6A8A376B80",
+  "0444728A376B80",
+  "0440718A376B80",
+  "04BB828A376B80",
+  "04BE6A8A376B80",
+  "04296E8A376B80",
+  "0471988A376B80",
+  "04B76A8A376B80",
+  "048DA08A376B80",
+  "049C6E8A376B80",
+  "044A988A376B80",
+  "0449718A376B80",
+  "04336E8A376B80",
+  "0423718A376B80",
+  "041D6E8A376B80",
+  "0454A18A376B80",
+  "043E758A376B80",
+  "0471688A376B80",
+  "042C7C8A376B80",
+  "04A6838A376B80",
+  "044D758A376B80",
+  "0464758A376B80",
+  "0476838A376B80",
+  "048E838A376B80",
+  "041D6C8A376B80",
+  "0496538A376B80",
+  "048B6B8A376B80",
+  "0453718A376B80",
+  "04396C8A376B80",
+  "042F538A376B80",
+  "04B1908A376B80",
+  "0449538A376B80",
+  "048E6E8A376B80",
+  "045C728A376B80",
+  "044E718A376B80",
+  "04A4908A376B80",
+  "04B16B8A376B80",
+  "049F6E8A376B80",
+  "048D838A376B80",
+  "042E6E8A376B80",
+  "04C06A8A376B80",
+  "0447718A376B80",
+  "04A56A8A376B80",
+  "047A998A376B80",
+  "04A1918A376B80",
+  "04BC6A8A376B80",
+  "04376E8A376B80",
+];
+
+export const initialKeygenData: Record<string, KeygenData> = {};
+
+export const oldKeygenData: Record<string, KeygenData> = {
   // BEGIN TEST CARDS
   "1": {
     box: "brown",
@@ -311,124 +365,6 @@ export const initialKeygenData: Record<string, KeygenData> = {
     box: "two",
     type: "person",
     label: "speaker 39",
-    isPersonSpeaker: false,
-  },
-  "51": {
-    box: "brown",
-    type: "talk",
-    label: "talk 1",
-    talkName: "MynaWallet",
-    talkStage: "main",
-    talkDescription: `​MynaWallet is AA wallet operated by Japanese national ID card that guarantees the security of a hardware wallet and sybil resistance. By leveraging zero-knowledge proofs, one's on-chain activity is not linked with their national ID card and users can publicly prove properties about their identity without actually revealing who they are.
-    
-    ​MynaWalletは、日本のマイナンバーカードによって運営されるAAウォレットであり、ハードウェアウォレットの安全性と耐シビル性を保証します。
-    
-    ​ゼロ知識証明を活用することで、チェーン上での活動がマイナンバーカードとリンクされることはなく、ユーザーは自分が誰であるかを実際に明かすことなく、自身の身元に関する特性を公に証明することができます。
-    `,
-    talkSpeaker: "Nico and Hiro",
-    talkStartTime: "10:00",
-    talkEndTime: "10:30",
-  },
-  "52": {
-    box: "brown",
-    type: "talk",
-    label: "talk 2",
-    talkName: "Proof of Passport",
-    talkStage: "main",
-    talkDescription: `Proof of Passport lets users use their passport to generate zero-knowledge proofs of humanity, nationality or age while staying privacy-preserving.
-
-    ​Proof of Passportは、パスポートを使用して、プライバシーを保護しながら、人間であること、国籍、年齢をゼロ知識で証明することができます。
-    `,
-    talkSpeaker: "Florent and Rémi",
-    talkStartTime: "10:30",
-    talkEndTime: "11:00",
-  },
-  "53": {
-    box: "brown",
-    type: "talk",
-    label: "talk 3",
-    talkName: "Cursive NFC Activations",
-    talkStage: "main",
-    talkDescription: `​Cursive focuses on consumer-facing apps of signed data to provide users with data ownership and authenticity. We create tangible, interactive experiences to better educate average people on signatures and other advanced cryptography. We are primarily focused on signatures from NFC and emails.
-    
-    ​Cursiveは、署名付きデータの消費者向けアプリケーションに焦点を当て、ユーザーにデータの所有権と信頼性を提供しています。
-    
-    ​私たちは、署名やその他の高度な暗号技術について一般の人々をよりよく啓発するために、具体的でインタラクティブな体験を創造します。主にNFCと電子メールによる署名に焦点を当てています。
-    `,
-    talkSpeaker: "Vivek and Andrew",
-    talkStartTime: "11:00",
-    talkEndTime: "11:30",
-  },
-  "54": {
-    box: "two",
-    type: "person",
-    label: "speaker 25",
-    isPersonSpeaker: false,
-  },
-  "55": {
-    box: "two",
-    type: "person",
-    label: "speaker 26",
-    isPersonSpeaker: false,
-  },
-  "56": {
-    box: "two",
-    type: "person",
-    label: "speaker 27",
-    isPersonSpeaker: false,
-  },
-  "57": {
-    box: "two",
-    type: "person",
-    label: "speaker 28",
-    isPersonSpeaker: false,
-  },
-  "58": {
-    box: "two",
-    type: "person",
-    label: "speaker 29",
-    isPersonSpeaker: false,
-  },
-  "59": {
-    box: "two",
-    type: "person",
-    label: "speaker 30",
-    isPersonSpeaker: false,
-  },
-  "60": {
-    box: "two",
-    type: "person",
-    label: "speaker 31",
-    isPersonSpeaker: false,
-  },
-  "61": {
-    box: "two",
-    type: "person",
-    label: "speaker 32",
-    isPersonSpeaker: false,
-  },
-  "62": {
-    box: "two",
-    type: "person",
-    label: "speaker 33",
-    isPersonSpeaker: false,
-  },
-  "63": {
-    box: "two",
-    type: "person",
-    label: "speaker 34",
-    isPersonSpeaker: false,
-  },
-  "64": {
-    box: "two",
-    type: "person",
-    label: "speaker 35",
-    isPersonSpeaker: false,
-  },
-  "65": {
-    box: "two",
-    type: "person",
-    label: "speaker 36",
     isPersonSpeaker: false,
   },
 };

@@ -56,15 +56,15 @@ export default function Register() {
   const [bio, setBio] = useState<string>();
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [chipId, setChipId] = useState<string>();
+  const [chipEnc, setChipEnc] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [isAccountReady, setIsAccountReady] = useState(false);
 
   const { work } = useWorker();
 
   useEffect(() => {
-    if (router.query.chipId) {
-      setChipId(router.query.chipId as string);
+    if (router.query.chipEnc) {
+      setChipEnc(router.query.chipEnc as string);
     }
   }, [router.query]);
 
@@ -267,7 +267,7 @@ export default function Register() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chipId,
+        chipEnc,
         displayName,
         encryptionPublicKey: publicKey,
         signaturePublicKey,

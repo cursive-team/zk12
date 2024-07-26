@@ -4,11 +4,7 @@ import { boolean, object, string } from "yup";
 import { ErrorResponse } from "@/types";
 import { sign } from "@/lib/shared/signature";
 import { getCounterMessage } from "babyjubjub-ecdsa";
-import {
-  ChipType,
-  getChipIdFromIykRef,
-  getChipTypeFromChipId,
-} from "@/lib/server/iyk";
+import { verifyCmac } from "@/lib/server/cmac";
 const crypto = require("crypto");
 
 export enum TapResponseCode {
@@ -123,11 +119,6 @@ export const generateChipSignature = async (
   return { message, signature };
 };
 
-/**
- * GET
- * Receives an iyk chip iykRef
- * Responds with person tap data, location tap data, or an error
- */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<TapResponse | ErrorResponse>
@@ -136,10 +127,16 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  // chipId must be provided
-  const chipId = req.query.chipId;
-  if (!chipId || typeof chipId !== "string") {
-    return res.status(400).json({ error: "Invalid chipId provided" });
+  // chipEnc must be provided
+  const chipEnc = req.query.chipEnc;
+  if (!chipEnc || typeof chipEnc !== "string") {
+    return res.status(400).json({ error: "Invalid chipEnc provided" });
+  }
+
+  // verify encryption
+  const chipId = verifyCmac(chipEnc);
+  if (!chipId) {
+    return res.status(400).json({ error: "Invalid chipEnc provided" });
   }
 
   // chip key must exist
@@ -154,6 +151,8 @@ export default async function handler(
       error: "Chip key not found",
     });
   }
+
+  console.log(chipKey);
 
   // if user is registered, return user data
   const user = await prisma.user.findUnique({
