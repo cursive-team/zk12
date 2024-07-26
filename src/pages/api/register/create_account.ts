@@ -7,14 +7,10 @@ import {
   telegramUsernameRegex,
   twitterUsernameRegex,
 } from "@/lib/shared/utils";
-import {
-  ChipType,
-  getChipIdFromIykRef,
-  getChipTypeFromChipId,
-} from "@/lib/server/iyk";
+import { verifyCmac } from "@/lib/server/cmac";
 
 const createAccountSchema = object({
-  chipId: string().optional().default(undefined),
+  chipEnc: string().optional().default(undefined),
   mockRef: string().optional().default(undefined),
   displayName: string().trim().required(),
   encryptionPublicKey: string().required(),
@@ -62,7 +58,7 @@ export default async function handler(
   }
 
   const {
-    chipId,
+    chipEnc,
     mockRef,
     displayName,
     encryptionPublicKey,
@@ -100,7 +96,12 @@ export default async function handler(
 
   let userSignaturePublicKey;
   let userSignaturePrivateKey;
-  if (chipId) {
+  if (chipEnc) {
+    let chipId = verifyCmac(chipEnc);
+    if (!chipId) {
+      return res.status(400).json({ error: "Invalid chipEnc provided" });
+    }
+
     const chipKey = await prisma.chipKey.findUnique({
       where: {
         chipId,
@@ -146,7 +147,11 @@ export default async function handler(
   // Check if user is already created
   let isExistingChipUser = false;
   let isUserRegistered = false;
-  if (chipId) {
+  if (chipEnc) {
+    let chipId = verifyCmac(chipEnc);
+    if (!chipId) {
+      return res.status(400).json({ error: "Invalid chipEnc provided" });
+    }
     const existingChipUser: any = await prisma.user.findUnique({
       where: {
         chipId,
@@ -160,7 +165,12 @@ export default async function handler(
   // If user is created and registered, return error
   if (isExistingChipUser && isUserRegistered) {
     return res.status(400).json({ error: "Card already registered" });
-  } else if (isExistingChipUser && chipId) {
+  } else if (isExistingChipUser && chipEnc) {
+    let chipId = verifyCmac(chipEnc);
+    if (!chipId) {
+      return res.status(400).json({ error: "Invalid chipEnc provided" });
+    }
+
     // If user is created but not registered, update user
     const updatedUser = await prisma.user.update({
       where: {
@@ -189,6 +199,14 @@ export default async function handler(
       signingKey: userSignaturePrivateKey,
       verifyingKey: userSignaturePublicKey,
     });
+  }
+
+  if (!chipEnc) {
+    return res.status(400).json({ error: "No chipEnc provided" });
+  }
+  let chipId = verifyCmac(chipEnc);
+  if (!chipId) {
+    return res.status(400).json({ error: "Invalid chipEnc provided" });
   }
 
   // If user is not created, create user

@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/server/prisma";
 import { generateSignatureKeyPair } from "@/lib/shared/signature";
-import { initialKeygenData } from "@/shared/keygen";
+import { initialKeygenData, keyUids } from "@/shared/keygen";
 import { getServerRandomNullifierRandomness } from "@/lib/server/proving";
 
 type CreateChipKeyData = {
@@ -62,17 +62,7 @@ export default async function handler(
     let totalIndex = 1;
     let userIndex = 1;
     let locationIndex = 1;
-    for (const [chipId, chipData] of Object.entries(initialKeygenData)) {
-      console.log(
-        "Generating keypair for chip",
-        chipId,
-        "(",
-        totalIndex++,
-        "of",
-        Object.keys(initialKeygenData).length,
-        ")"
-      );
-
+    for (const chipId of keyUids) {
       // Generate and save signing keypair
       const { signingKey, verifyingKey } = generateSignatureKeyPair();
       allChipKeyData.push({
@@ -81,55 +71,17 @@ export default async function handler(
         signaturePrivateKey: signingKey,
       });
 
-      // Logic for person chips
-      if (chipData.type === "person") {
-        // Precreate user object
-        const isUserSpeaker = chipData.isPersonSpeaker ? true : false;
-        allUserData.push({
-          chipId,
-          isRegistered: false,
-          isUserSpeaker,
-          displayName: chipId,
-          encryptionPublicKey: "",
-          signaturePublicKey: verifyingKey,
-          psiPublicKeysLink: "",
-        });
-        allUserIds.push(userIndex);
-        if (chipData.isPersonSpeaker) {
-          speakerUserIds.push(userIndex);
-        }
-        userIndex++;
-
-        // Logic for talk chips
-      } else if (chipData.type === "talk") {
-        const name = chipData.talkName ? chipData.talkName : "Example Talk";
-        const stage = chipData.talkStage ? chipData.talkStage : "Example Stage";
-        const speaker = chipData.talkSpeaker
-          ? chipData.talkSpeaker
-          : "Example Speaker";
-        const description = chipData.talkDescription
-          ? chipData.talkDescription
-          : "Example Description";
-        const startTime = chipData.talkStartTime
-          ? chipData.talkStartTime
-          : "12:00";
-        const endTime = chipData.talkEndTime ? chipData.talkEndTime : "13:00";
-        allLocationData.push({
-          id: locationIndex,
-          chipId,
-          name,
-          stage,
-          speaker,
-          description,
-          startTime,
-          endTime,
-          signaturePublicKey: verifyingKey,
-        });
-        allTalkIds.push(locationIndex);
-        locationIndex++;
-      } else {
-        console.error("Invalid keygen type, chipId:", chipId);
-      }
+      allUserData.push({
+        chipId,
+        isRegistered: false,
+        isUserSpeaker: false,
+        displayName: chipId,
+        encryptionPublicKey: "",
+        signaturePublicKey: verifyingKey,
+        psiPublicKeysLink: "",
+      });
+      allUserIds.push(userIndex);
+      userIndex++;
     }
 
     // Create all chip keys
@@ -151,7 +103,7 @@ export default async function handler(
     // Quest 1: Meet 10 attendees
     await prisma.quest.create({
       data: {
-        name: "🦋 Symposium Seeker",
+        name: "🦋 Social Butterfly",
         description:
           "Connect with 10 people to make this proof. Ask to tap their ring, share socials, and discover event activity that you have in common.",
         userRequirements: {
@@ -175,7 +127,7 @@ export default async function handler(
     // Quest 2: Meet 3 speakers
     await prisma.quest.create({
       data: {
-        name: "🎤 Oracle Encounter",
+        name: "🎤 Engage the speakers",
         description:
           "Ask 3 speakers a question or share feedback about their talk. Ask to tap their ring to collect a link to their presentation slides (if available)",
         userRequirements: {
