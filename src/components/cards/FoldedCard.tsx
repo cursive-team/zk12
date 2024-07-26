@@ -604,8 +604,8 @@ export const FoldedCard = ({ items }: FoldedCardProps) => {
             Folded Experience
           </h3>
           <span className="text-xs text-iron-900">
-            Using client-side Nova folding proofs, create and share a Spotify
-            Wrapped-like summary of who you've met and what you've done.
+            {`Using client-side Nova folding proofs, create and share a Spotify
+            Wrapped-like summary of who you've met and what you've done.`}
           </span>
         </div>
       </Card.Base>
