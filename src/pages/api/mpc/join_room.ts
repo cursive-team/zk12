@@ -11,7 +11,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { authToken, roomId } = JSON.parse(req.body);
+  const { authToken, roomId, password } = JSON.parse(req.body);
 
   const userId = await verifyAuthToken(authToken);
   if (!userId) {
@@ -25,6 +25,19 @@ export default async function handler(
 
     if (!room) {
       return res.status(404).json({ error: "Room not found" });
+    }
+
+    if (password !== room.password) {
+      return res.status(400).json({ error: "Incorrect password" });
+    }
+
+    const memberCount = await prisma.roomMember.count({
+      where: {
+        roomId: roomId,
+      },
+    });
+    if (memberCount >= room.numParties) {
+      return res.status(400).json({ error: "Room is full" });
     }
 
     await prisma.roomMember.create({

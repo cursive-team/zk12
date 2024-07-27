@@ -9,6 +9,8 @@ import Rating from "@mui/material/Rating";
 import { Input } from "@/components/Input";
 import { getAuthToken } from "@/lib/client/localStorage";
 import { Room, RoomMember } from "@prisma/client";
+import { Spinner } from "@/components/Spinner";
+import { classed } from "@tw-classed/react";
 
 enum OutputState {
   NOT_CONNECTED,
@@ -19,6 +21,20 @@ enum OutputState {
   SHOW_RESULTS,
   ERROR,
 }
+
+const Title = classed.h3("block font-sans text-iron-950", {
+  variants: {
+    size: {
+      small: "text-base leading-1 font-semibold",
+      medium: "text-[21px] leading-5 font-medium",
+    },
+  },
+  defaultVariants: {
+    size: "small",
+  },
+});
+
+const Description = classed.span("text-md text-iron-600 leading-5");
 
 const fruits = [
   "Apple",
@@ -35,6 +51,7 @@ const fruits = [
 
 export default function Fruits() {
   const [createRoomName, setCreateRoomName] = useState<string>();
+  const [createRoomPassword, setCreateRoomPassword] = useState<string>("");
   const [createRoomPartyCount, setCreateRoomPartyCount] = useState<number>();
   const [hasCreatedRoom, setHasCreatedRoom] = useState<boolean>(false);
   const [roomName, setRoomName] = useState<string>();
@@ -48,6 +65,9 @@ export default function Fruits() {
   const [output, setOutput] = useState<OutputState>(OutputState.NOT_CONNECTED);
   const [avgResults, setAvgResults] = useState<number[]>([]);
   const [stdResults, setStdResults] = useState<number[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
+  const [loadingCreateRoom, setLoadingCreateRoom] = useState<boolean>(false);
+  const [loadingJoin, setLoadingJoin] = useState<number>();
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -60,21 +80,29 @@ export default function Fruits() {
         },
         {}
       );
+      setCreateRoomName(undefined);
+      setCreateRoomPartyCount(undefined);
+      setCreateRoomPassword("");
+      setLoadingRooms(false);
       setAllRooms(roomsMapping);
     };
     fetchRooms();
   }, []);
 
   const handleCreateRoom = async () => {
+    setLoadingCreateRoom(true);
     if (!createRoomName || !createRoomPartyCount) {
+      setLoadingCreateRoom(false);
       return toast.error("Please fill in all fields");
     }
 
     if (createRoomPartyCount < 2) {
+      setLoadingCreateRoom(false);
       return toast.error("Party count must be at least 2");
     }
 
     if (/\s/.test(createRoomName)) {
+      setLoadingCreateRoom(false);
       return toast.error("Room name cannot contain whitespace");
     }
 
@@ -89,6 +117,7 @@ export default function Fruits() {
         authToken: authToken.value,
         name: createRoomName,
         numParties: createRoomPartyCount,
+        password: createRoomPassword,
       }),
     });
 
@@ -111,6 +140,7 @@ export default function Fruits() {
       const { error } = await response.json();
       toast.error(error);
     }
+    setLoadingCreateRoom(false);
   };
 
   const connect = (roomName: string, numParties: number) => {
@@ -135,6 +165,8 @@ export default function Fruits() {
             error.includes("Maximum parties capacity reached") ||
             error.includes("contradicting party count")
           ) {
+            setLoadingJoin(undefined);
+            setLoadingCreateRoom(false);
             toast.error("Computation is full. Try another computation ID.");
           }
           setOutput(OutputState.ERROR);
@@ -275,15 +307,15 @@ export default function Fruits() {
       case OutputState.NOT_CONNECTED:
         return "Connect";
       case OutputState.AWAITING_OTHER_PARTIES_CONNECTION:
-        return "Awaiting other parties connection";
+        return "Awaiting other parties connection...";
       case OutputState.CONNECTED:
-        return "Submit ratings to proceed";
+        return "Submit ratings to proceed!";
       case OutputState.AWAITING_OTHER_PARTIES_INPUTS:
-        return "Awaiting other parties inputs";
+        return "Awaiting other parties inputs...";
       case OutputState.COMPUTING:
         return "Computing...";
       case OutputState.SHOW_RESULTS:
-        return "Fruit ratings computed!";
+        return "The fruits have been rated by the crowd!";
       case OutputState.ERROR:
         return "Error - please try again";
     }
@@ -292,7 +324,20 @@ export default function Fruits() {
   if (roomName) {
     return (
       <div>
-        <AppBackHeader onBackClick={() => setRoomName(undefined)} />
+        <AppBackHeader
+          onBackClick={() => {
+            if (output !== OutputState.SHOW_RESULTS) {
+              let choice = window.confirm(
+                "Are you sure you want to leave? This will end the computation for the entire room."
+              );
+              if (choice) {
+                setRoomName(undefined);
+              }
+            } else {
+              setRoomName(undefined);
+            }
+          }}
+        />
 
         <div className="flex flex-col gap-6 h-modal">
           <div className="flex flex-col gap-6">
@@ -302,17 +347,15 @@ export default function Fruits() {
             <span className="text-iron-600 text-sm font-normal">{`Rate some fruits with your friends, discover how aligned you
                       are without revealing any specific votes.`}</span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-lg xs:text-xl mb-2 text-iron-950 leading-6 font-bold">
-              Room: {roomName}
+          <div className="flex flex-col gap-1">
+            <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
+              {roomName}
             </span>
-            <span className="text-lg xs:text-xl mb-2 text-iron-950 leading-6 font-bold">
-              Status: {getButtonDisplay()}
-            </span>
+            <Description>{getButtonDisplay()}</Description>
           </div>
           <div>
             {output === OutputState.CONNECTED && (
-              <div>
+              <div className="mb-16">
                 {fruits.map((fruit, index) => (
                   <div key={index} className="mb-4">
                     <label className="block text-black mb-2">{fruit}</label>
@@ -332,11 +375,8 @@ export default function Fruits() {
               </div>
             )}
             {output === OutputState.SHOW_RESULTS && (
-              <div className="mt-4 text-black">
-                <p className="mb-4 font-bold">
-                  The fruits have been rated by the crowd.
-                </p>
-                <ul>
+              <div className="text-black">
+                <div className="flex flex-col gap-4">
                   {fruits
                     .map((fruit, index) => ({
                       fruit,
@@ -344,13 +384,18 @@ export default function Fruits() {
                     }))
                     .sort((a, b) => b.rating - a.rating)
                     .map(({ fruit, rating }, index) => (
-                      <li key={index}>
-                        {`${fruit}: ${rating.toFixed(1)} (std: ${stdResults[
+                      <div
+                        className="flex flex-row align-center gap-2"
+                        key={index}
+                      >
+                        {`${fruit} `}
+                        <Rating value={rating} readOnly precision={0.01} />
+                        {`(${rating.toFixed(1)}, std: ${stdResults[
                           fruits.indexOf(fruit)
                         ].toFixed(2)})`}
-                      </li>
+                      </div>
                     ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>
@@ -368,76 +413,104 @@ export default function Fruits() {
           <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
             🍎 Rate fruits
           </span>
-          <span className="text-iron-600 text-sm font-normal">{`Rate some fruits with your friends, discover how aligned you
-                    are without revealing any specific votes.`}</span>
-        </div>
-        <div>
-          <div className="mb-4">
-            <span className="text-lg xs:text-xl text-iron-950 leading-6 font-bold">
-              Join a room
+          <div className="flex flex-col gap-2">
+            <span className="text-iron-600 text-sm font-normal">
+              {`Rate some fruits with your friends, discover how aligned you
+              are without revealing any specific votes.`}
             </span>
-            <div className="flex flex-col gap-2">
-              {Object.values(allRooms).map((room) => (
-                <div
-                  key={room.id}
-                  className="flex items-center justify-between"
-                >
-                  <span className="text-md text-iron-950 leading-6 font-medium">
-                    {room.name} ({room.members.length}/{room.numParties}{" "}
-                    members)
-                  </span>
-                  <div className="max-w-[100px] ml-auto">
-                    <Button
-                      onClick={async () => {
-                        const authToken = getAuthToken();
-                        if (!authToken) {
-                          return toast.error("Please login to join a room");
-                        }
-
-                        const response = await fetch("/api/mpc/join_room", {
-                          method: "POST",
-                          body: JSON.stringify({
-                            authToken: authToken.value,
-                            roomId: room.id,
-                          }),
-                        });
-                        if (!response.ok) {
-                          const { error } = await response.json();
-                          return toast.error(error);
-                        }
-
-                        setRoomName(room.name);
-                        setHasCreatedRoom(false);
-                        connect(room.name, room.numParties);
-                      }}
-                    >
-                      Join
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {Object.values(allRooms).length === 0 && (
-              <span className="text-iron-600 text-sm font-normal">
-                No rooms available
-              </span>
-            )}
+            <span className="text-iron-600 text-sm font-normal">
+              {`Find a group of 3 or more people 
+              and set your party size accordingly.`}
+            </span>
           </div>
-          <div>
-            <span className="text-lg xs:text-xl mb-2 text-iron-950 leading-6 font-bold">
-              Create a room
-            </span>
+        </div>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <Title>Join a room</Title>
+            <div className="flex flex-col gap-2">
+              {loadingRooms ? (
+                <Spinner />
+              ) : Object.values(allRooms).length === 0 ? (
+                <span className="text-iron-600 text-sm font-normal">
+                  No rooms available
+                </span>
+              ) : (
+                Object.values(allRooms).map((room) =>
+                  room.members.length < room.numParties || !room.isActive ? (
+                    <div
+                      key={room.id}
+                      className="flex items-center justify-between"
+                    >
+                      <Description>
+                        {room.name} ({room.members.length}/{room.numParties}{" "}
+                        members)
+                      </Description>
+                      <div className="max-w-[100px] ml-auto py-2">
+                        <Button
+                          size="small"
+                          variant="tertiary"
+                          disabled={
+                            loadingJoin !== undefined && loadingJoin !== room.id
+                          }
+                          loading={loadingJoin === room.id}
+                          onClick={async () => {
+                            let password = window.prompt(
+                              "Enter room password."
+                            );
+
+                            if (password === null) {
+                              password = "";
+                            }
+
+                            setLoadingJoin(room.id);
+                            const authToken = getAuthToken();
+                            if (!authToken) {
+                              return toast.error("Please login to join a room");
+                            }
+
+                            const response = await fetch("/api/mpc/join_room", {
+                              method: "POST",
+                              body: JSON.stringify({
+                                authToken: authToken.value,
+                                roomId: room.id,
+                                password: password,
+                              }),
+                            });
+                            if (!response.ok) {
+                              const { error } = await response.json();
+                              setLoadingJoin(undefined);
+                              return toast.error(error);
+                            }
+
+                            setRoomName(room.name);
+                            setHasCreatedRoom(false);
+                            connect(room.name, room.numParties);
+                            setLoadingJoin(undefined);
+                          }}
+                        >
+                          Join
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <></>
+                  )
+                )
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col gap-4 mb-16">
+            <div className="flex flex-col gap-1 ">
+              <Title>Create new room</Title>
+            </div>
             <Input
-              type="text"
-              placeholder="Room name"
-              className="input mt-2 mb-2"
+              label="Room name"
               value={createRoomName}
               onChange={(e) => setCreateRoomName(e.target.value)}
             />
             <Input
+              label="Party count"
               type="number"
-              placeholder="Party count"
-              className="input mt-2 mb-2"
               value={createRoomPartyCount}
               onChange={(e) =>
                 e.target.value
@@ -445,7 +518,14 @@ export default function Fruits() {
                   : setCreateRoomPartyCount(undefined)
               }
             />
-            <Button onClick={handleCreateRoom}>Create</Button>
+            <Input
+              label="Password"
+              value={createRoomPassword}
+              onChange={(e) => setCreateRoomPassword(e.target.value)}
+            />
+            <Button onClick={handleCreateRoom} loading={loadingCreateRoom}>
+              Create
+            </Button>
           </div>
         </div>
       </div>

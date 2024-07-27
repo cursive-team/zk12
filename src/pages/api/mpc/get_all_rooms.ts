@@ -16,7 +16,15 @@ export default async function handler(
         members: true,
         creator: true,
       },
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        createdAt: {
+          gte: new Date(new Date().getTime() - 60 * 60 * 1000),
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     return res.status(200).json({ rooms });

@@ -11,7 +11,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { authToken, name, numParties } = JSON.parse(req.body);
+  const { authToken, name, numParties, password } = JSON.parse(req.body);
 
   const userId = await verifyAuthToken(authToken);
   if (!userId) {
@@ -34,6 +34,7 @@ export default async function handler(
         name,
         numParties,
         creatorId: userId,
+        password: password,
       },
     });
 
