@@ -451,15 +451,24 @@ export default function Register() {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
         />
-        <Button type="submit" loading={loading}>
-          Register with passkey
-        </Button>
-        <span
-          className="text-center text-sm"
-          onClick={handleCreateWithPassword}
-        >
-          <u>Register with password instead</u>
-        </span>
+        <div className="flex flex-col gap-2">
+          <Button type="submit" loading={loading}>
+            Register with passkey
+          </Button>
+          <div className="text-center">
+            <span
+              className="text-center text-sm"
+              onClick={handleCreateWithPassword}
+            >
+              <u>Register with password</u>
+            </span>
+          </div>
+          <div className="text-center">
+            <span className="text-sm" onClick={() => router.push("/login")}>
+              <u>Already have account</u>
+            </span>
+          </div>
+        </div>
       </FormStepLayout>
     ),
     [DisplayState.PASSWORD]: (
