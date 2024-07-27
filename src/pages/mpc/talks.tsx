@@ -37,19 +37,19 @@ const Title = classed.h3("block font-sans text-iron-950", {
 const Description = classed.span("text-md text-iron-600 leading-5");
 
 const fruits = [
-  "Apple",
-  "Banana",
-  "Cherry",
-  "Date",
-  "Elderberry",
-  "Fig",
-  "Grape",
-  "Honeydew",
-  "Kiwi",
-  "Lemon",
+  "Cypherpunk Mission-Driven Cryptography",
+  "Introduction to MPC",
+  "Introduction to FHE",
+  "Privacy-preserving Statistics",
+  "Oblivious Message Retrieval for Zcash",
+  "Encrypted Scholarship",
+  "mpz-play",
+  "Write a Circuit in TypeScript",
+  "Private Collaborative Research",
+  "Backpocket Multiplayer Vault Demo",
 ];
 
-export default function Fruits() {
+export default function Talks() {
   const [createRoomName, setCreateRoomName] = useState<string>();
   const [createRoomPassword, setCreateRoomPassword] = useState<string>("");
   const [createRoomPartyCount, setCreateRoomPartyCount] = useState<number>();
@@ -96,7 +96,7 @@ export default function Fruits() {
       return toast.error("Please fill in all fields");
     }
 
-    const newRoomName = "FRUIT-" + createRoomName;
+    const newRoomName = "TALKS-" + createRoomName;
 
     if (createRoomPartyCount < 2) {
       setLoadingCreateRoom(false);
@@ -186,17 +186,74 @@ export default function Fruits() {
     setJiffClient(client);
   };
 
+  const mpcBubbleSort = (arr: any[]) => {
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr.length - i - 1; j++) {
+        const a = arr[j];
+        const b = arr[j + 1];
+        const cmp = a.slt(b);
+        arr[j] = cmp.if_else(a, b);
+        arr[j + 1] = cmp.if_else(b, a);
+      }
+    }
+
+    return arr;
+  };
+
+  /**
+   * The MPC computation
+   */
+
+  function oddEvenSort(a: any, lo: any, n: any) {
+    if (n > 1) {
+      const m = Math.floor(n / 2);
+      oddEvenSort(a, lo, m);
+      oddEvenSort(a, lo + m, m);
+      oddEvenMerge(a, lo, n, 1);
+    }
+  }
+
+  // lo: lower bound of indices, n: number of elements, r: step
+  function oddEvenMerge(a: any, lo: any, n: any, r: any) {
+    const m = r * 2;
+    if (m < n) {
+      oddEvenMerge(a, lo, n, m);
+      oddEvenMerge(a, lo + r, n, m);
+
+      for (let i = lo + r; i + r < lo + n; i += m) {
+        compareExchange(a, i, i + r);
+      }
+    } else if (m === n) {
+      compareExchange(a, lo, lo + r);
+    }
+  }
+
+  function compareExchange(a: any, i: any, j: any) {
+    if (j >= a.length || i >= a.length) {
+      return;
+    }
+
+    const x = a[i];
+    const y = a[j];
+
+    const cmp = x.lt(y);
+    a[i] = cmp.if_else(x, y);
+    a[j] = cmp.if_else(y, x);
+  }
+
   const submit = async () => {
     if (ratings.some((rating) => rating < 1 || rating > 5)) {
       toast.error("All ratings must be between 1 and 5.");
       return;
     }
 
+    const newRatings = ratings.map((rating) => rating * 10);
+
     setOutput(OutputState.AWAITING_OTHER_PARTIES_INPUTS);
 
     if (jiffClient) {
-      console.log(`Beginning MPC with ratings ${ratings}`);
-      let shares = await jiffClient.share_array(ratings);
+      console.log(`Beginning MPC with ratings ${newRatings}`);
+      let shares = await jiffClient.share_array(newRatings);
       console.log("Shares: ", shares);
       setOutput(OutputState.COMPUTING);
 
@@ -214,76 +271,22 @@ export default function Fruits() {
         }
       }
 
-      // for (let k = 0; k < sumShares.length; k++) {
-      //   sumShares[k] = sumShares[k].cdiv(jiffClient.party_count);
-      // }
-      // console.log("Averaged Sum Shares: ", sumShares);
+      for (let j = 0; j < fruits.length; j++) {
+        sumShares[j] = sumShares[j].cadd(j);
+      }
 
-      const sumResults = await Promise.all(
-        sumShares.map((share: any) => jiffClient.open(share))
+      oddEvenSort(sumShares, 0, sumShares.length);
+
+      const results = await Promise.all(
+        sumShares.slice(-3).map((share: any) => jiffClient.open(share))
       );
-      console.log("Sum Results: ", sumResults);
-      const averageResults = sumResults.map(
-        (result: BigNumber) => result.toNumber() / jiffClient.party_count
-      );
-      console.log("Average Results: ", averageResults);
 
       const averageTime = Date.now() - startAverageTime;
-      console.log("Average Time: ", averageTime);
+      console.log("Ranking Time: ", averageTime);
 
-      // Start standard deviation computation
-      const startStdTime = Date.now();
-
-      let squaredSumShares: any[] = [];
-      for (let i = 0; i < sumShares.length; i++) {
-        squaredSumShares.push(sumShares[i].smult(sumShares[i]));
-      }
-
-      let sumOfSquaresShares: any[] = [];
-      for (let i = 1; i <= jiffClient.party_count; i++) {
-        for (let j = 0; j < sumShares.length; j++) {
-          const shareSquared = shares[i][j].smult(shares[i][j]);
-          if (i === 1) {
-            sumOfSquaresShares.push(shareSquared);
-          } else {
-            sumOfSquaresShares[j] = sumOfSquaresShares[j].sadd(shareSquared);
-          }
-        }
-      }
-      for (let k = 0; k < sumOfSquaresShares.length; k++) {
-        sumOfSquaresShares[k] = sumOfSquaresShares[k].cmult(
-          jiffClient.party_count
-        );
-      }
-
-      let stdResultShares: any[] = [];
-      for (let i = 0; i < sumShares.length; i++) {
-        const squaredSum = squaredSumShares[i];
-        const sumOfSquares = sumOfSquaresShares[i];
-        const stdResult = sumOfSquares.ssub(squaredSum);
-        stdResultShares.push(stdResult);
-      }
-
-      const rawStdResults = await Promise.all(
-        stdResultShares.map((diff: any) => jiffClient.open(diff))
-      );
-      const stdResults = rawStdResults.map((result: BigNumber) =>
-        Math.sqrt(
-          result.toNumber() /
-            (jiffClient.party_count * (jiffClient.party_count - 1))
-        )
-      );
-      console.log("Std Results:", stdResults);
-
-      const stdTime = Date.now() - startStdTime;
-      console.log("Std Time: ", stdTime);
-
-      setAvgResults(averageResults);
-      setStdResults(stdResults);
+      setAvgResults(results);
       setOutput(OutputState.SHOW_RESULTS);
-      toast.success(
-        `MPC runtime: ${averageTime}ms for average, ${stdTime}ms for standard deviation`
-      );
+      toast.success(`MPC runtime: ${averageTime}`);
 
       console.log("ending", hasCreatedRoom);
       if (hasCreatedRoom) {
@@ -317,7 +320,7 @@ export default function Fruits() {
       case OutputState.COMPUTING:
         return "Computing...";
       case OutputState.SHOW_RESULTS:
-        return "The fruits have been rated by the crowd!";
+        return "Here are the top 3 talks!";
       case OutputState.ERROR:
         return "Error - please try again";
     }
@@ -344,10 +347,9 @@ export default function Fruits() {
         <div className="flex flex-col gap-6 h-modal">
           <div className="flex flex-col gap-6">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
-              🍎 Rate fruits
+              {`📓 Find your group's top 3 talks`}
             </span>
-            <span className="text-iron-600 text-sm font-normal">{`Rate some fruits with your friends, discover how aligned you
-                      are without revealing any specific votes.`}</span>
+            <span className="text-iron-600 text-sm font-normal">{`Rate the workshop talks with your friends, and find out the top 3 most loved talks without revealing the ratings of any other ones!`}</span>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
@@ -379,24 +381,7 @@ export default function Fruits() {
             {output === OutputState.SHOW_RESULTS && (
               <div className="text-black">
                 <div className="flex flex-col gap-4">
-                  {fruits
-                    .map((fruit, index) => ({
-                      fruit,
-                      rating: avgResults[index],
-                    }))
-                    .sort((a, b) => b.rating - a.rating)
-                    .map(({ fruit, rating }, index) => (
-                      <div
-                        className="flex flex-row align-center gap-2"
-                        key={index}
-                      >
-                        {`${fruit} `}
-                        <Rating value={rating} readOnly precision={0.01} />
-                        {`(${rating.toFixed(1)}, std: ${stdResults[
-                          fruits.indexOf(fruit)
-                        ].toFixed(2)})`}
-                      </div>
-                    ))}
+                  {avgResults.map((el) => fruits[el % 10]).join(", ")}
                 </div>
               </div>
             )}
@@ -413,12 +398,12 @@ export default function Fruits() {
       <div className="flex flex-col gap-6 h-modal">
         <div className="flex flex-col gap-6">
           <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
-            🍎 Rate fruits
+            {`📓 Find your group's top 3 talks`}
           </span>
           <div className="flex flex-col gap-2">
             <span className="text-iron-600 text-sm font-normal">
-              {`Rate some fruits with your friends, discover how aligned you
-              are without revealing any specific votes.`}
+              {`Rate the workshop talks with your friends, and find out the top 3 most loved 
+              talks without revealing the ratings of any other ones!`}
             </span>
             <span className="text-iron-600 text-sm font-normal">
               {`Find a group of 3 or more people 
@@ -439,7 +424,7 @@ export default function Fruits() {
               ) : (
                 Object.values(allRooms).map((room) =>
                   room.members.length < room.numParties &&
-                  room.name.startsWith("FRUIT-") ? (
+                  room.name.startsWith("TALKS-") ? (
                     <div
                       key={room.id}
                       className="flex items-center justify-between"
@@ -536,6 +521,6 @@ export default function Fruits() {
   );
 }
 
-Fruits.getInitialProps = () => {
+Talks.getInitialProps = () => {
   return { showHeader: false, showFooter: false };
 };
