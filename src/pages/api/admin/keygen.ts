@@ -63,30 +63,30 @@ export default async function handler(
     const allUserData: PrecreateUserData[] = [];
     const allLocationData: CreateLocationData[] = [];
 
-    // const newKeyUids = [];
-    // for (let i = 1; i <= 50; i++) {
-    //   newKeyUids.push("CURSIVE" + i.toString().padStart(2, "0"));
-    // }
+    const newKeyUids = [];
+    for (let i = 1; i <= 50; i++) {
+      newKeyUids.push("CURSIVE" + i.toString().padStart(2, "0"));
+    }
 
-    // for (const chipId of newKeyUids) {
-    //   // Generate and save signing keypair
-    //   const { signingKey, verifyingKey } = generateSignatureKeyPair();
-    //   allChipKeyData.push({
-    //     chipId,
-    //     signaturePublicKey: verifyingKey,
-    //     signaturePrivateKey: signingKey,
-    //   });
+    for (const chipId of newKeyUids) {
+      // Generate and save signing keypair
+      const { signingKey, verifyingKey } = generateSignatureKeyPair();
+      allChipKeyData.push({
+        chipId,
+        signaturePublicKey: verifyingKey,
+        signaturePrivateKey: signingKey,
+      });
 
-    //   allUserData.push({
-    //     chipId,
-    //     isRegistered: false,
-    //     isUserSpeaker: false,
-    //     displayName: chipId,
-    //     encryptionPublicKey: "",
-    //     signaturePublicKey: verifyingKey,
-    //     psiPublicKeysLink: "",
-    //   });
-    // }
+      allUserData.push({
+        chipId,
+        isRegistered: false,
+        isUserSpeaker: false,
+        displayName: chipId,
+        encryptionPublicKey: "",
+        signaturePublicKey: verifyingKey,
+        psiPublicKeysLink: "",
+      });
+    }
 
     // create all locations
     let locationIndex = 1;
