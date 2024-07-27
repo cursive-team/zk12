@@ -31,7 +31,6 @@ import { Card } from "@/components/cards/Card";
 import { Spinner } from "@/components/Spinner";
 import Link from "next/link";
 import { logClientEvent } from "@/lib/client/metrics";
-import { useWorker } from "@/hooks/useWorker";
 
 enum DisplayState {
   PASSKEY,
@@ -59,8 +58,6 @@ export default function Register() {
   const [chipEnc, setChipEnc] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [isAccountReady, setIsAccountReady] = useState(false);
-
-  const { work } = useWorker();
 
   useEffect(() => {
     if (router.query.chipEnc) {
@@ -386,9 +383,6 @@ export default function Register() {
       setLoading(false);
       return;
     }
-
-    // Begin downloading params in web worker
-    work([], []);
 
     setIsAccountReady(true);
     setLoading(false);
