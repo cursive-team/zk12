@@ -201,18 +201,10 @@ export default async function handler(
     });
   }
 
-  if (!chipEnc) {
-    return res.status(400).json({ error: "No chipEnc provided" });
-  }
-  let chipId = verifyCmac(chipEnc);
-  if (!chipId) {
-    return res.status(400).json({ error: "Invalid chipEnc provided" });
-  }
-
   // If user is not created, create user
   const user = await prisma.user.create({
     data: {
-      chipId,
+      chipId: chipEnc,
       // @ts-ignore
       isRegistered: true,
       displayName,
