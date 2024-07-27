@@ -9,6 +9,13 @@ export const verifyCmac = (hexData: string): string | undefined => {
     return hexData;
   }
 
+  if (hexData.startsWith("TALK")) {
+    const lastTwoChars = hexData.slice(-2);
+    const num = parseInt(lastTwoChars, 10);
+    if (isNaN(num) || num < 1 || num > 10) return undefined;
+    return hexData;
+  }
+
   const cardKeys = process.env.CARD_KEYS!.split(",");
 
   for (const key of cardKeys) {

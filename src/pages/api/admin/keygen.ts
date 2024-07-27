@@ -1,7 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/server/prisma";
 import { generateSignatureKeyPair } from "@/lib/shared/signature";
-import { initialKeygenData, keyUids } from "@/shared/keygen";
+import {
+  initialKeygenData,
+  initialLocationData,
+  keyUids,
+} from "@/shared/keygen";
 import { getServerRandomNullifierRandomness } from "@/lib/server/proving";
 
 type CreateChipKeyData = {
@@ -52,11 +56,12 @@ export default async function handler(
 
   try {
     const allUserIds: number[] = [];
+    const allTalkIds: number[] = [];
     // const speakerUserIds: number[] = [];
 
     const allChipKeyData: CreateChipKeyData[] = [];
     const allUserData: PrecreateUserData[] = [];
-    // const allLocationData: CreateLocationData[] = [];
+    const allLocationData: CreateLocationData[] = [];
 
     const newKeyUids = [];
     for (let i = 1; i <= 50; i++) {
@@ -83,6 +88,44 @@ export default async function handler(
       });
     }
 
+    // create all locations
+    let locationIndex = 1;
+    for (const [chipId, chipData] of Object.entries(initialLocationData)) {
+      // Generate and save signing keypair
+      const { signingKey, verifyingKey } = generateSignatureKeyPair();
+      allChipKeyData.push({
+        chipId,
+        signaturePublicKey: verifyingKey,
+        signaturePrivateKey: signingKey,
+      });
+
+      const name = chipData.talkName ? chipData.talkName : "Example Talk";
+      const stage = chipData.talkStage ? chipData.talkStage : "Example Stage";
+      const speaker = chipData.talkSpeaker
+        ? chipData.talkSpeaker
+        : "Example Speaker";
+      const description = chipData.talkDescription
+        ? chipData.talkDescription
+        : "Example Description";
+      const startTime = chipData.talkStartTime
+        ? chipData.talkStartTime
+        : "12:00";
+      const endTime = chipData.talkEndTime ? chipData.talkEndTime : "13:00";
+      allLocationData.push({
+        id: locationIndex,
+        chipId,
+        name,
+        stage,
+        speaker,
+        description,
+        startTime,
+        endTime,
+        signaturePublicKey: verifyingKey,
+      });
+      allTalkIds.push(locationIndex);
+      locationIndex++;
+    }
+
     // Create all chip keys
     await prisma.chipKey.createMany({
       data: allChipKeyData,
@@ -94,9 +137,9 @@ export default async function handler(
     });
 
     // Create all locations
-    // await prisma.location.createMany({
-    //   data: allLocationData,
-    // });
+    await prisma.location.createMany({
+      data: allLocationData,
+    });
 
     // BEGIN HARDCODED QUESTS FOR SIG SING WORKSHOP
     // Quest 1: Meet 10 attendees
@@ -148,28 +191,28 @@ export default async function handler(
     // });
 
     // Quest 3: Attend 5 talks
-    // await prisma.quest.create({
-    //   data: {
-    //     name: "👩‍🏫 Acropolis Assembler",
-    //     description:
-    //       "Tap in to 5 talks at Zk Summit 11 to make this proof. Look for cards on posters at conference room entrances.",
-    //     userRequirements: {
-    //       create: [],
-    //     },
-    //     locationRequirements: {
-    //       create: [
-    //         {
-    //           name: "Attend 5 talks at ZK Summit 11",
-    //           numSigsRequired: 5,
-    //           sigNullifierRandomness: getServerRandomNullifierRandomness(), // Ensures signatures cannot be reused to meet this requirement
-    //           locations: {
-    //             connect: allTalkIds.map((id) => ({ id })),
-    //           },
-    //         },
-    //       ],
-    //     },
-    //   },
-    // });
+    await prisma.quest.create({
+      data: {
+        name: "👩‍🏫 Collect 5 Talk ZK-POAPs",
+        description:
+          "Collect 5 ZK-POAPs for talks you enjoyed to make this proof. Find the NFC stickers corresponding to each one.",
+        userRequirements: {
+          create: [],
+        },
+        locationRequirements: {
+          create: [
+            {
+              name: "Attend 5 talks at ZK Summit 11",
+              numSigsRequired: 5,
+              sigNullifierRandomness: getServerRandomNullifierRandomness(), // Ensures signatures cannot be reused to meet this requirement
+              locations: {
+                connect: allTalkIds.map((id) => ({ id })),
+              },
+            },
+          ],
+        },
+      },
+    });
     // END HARDCODED QUESTS FOR SIG SING WORKSHOP
 
     res.status(200).json({});
