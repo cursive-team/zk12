@@ -45,24 +45,25 @@ export default async function handler(
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const existingChipKey = await prisma.chipKey.findFirst();
-  if (existingChipKey) {
-    return res.status(400).json({ error: "Chip keys already exist" });
-  }
+  // const existingChipKey = await prisma.chipKey.findFirst();
+  // if (existingChipKey) {
+  //   return res.status(400).json({ error: "Chip keys already exist" });
+  // }
 
   try {
     const allUserIds: number[] = [];
-    const speakerUserIds: number[] = [];
-    const allTalkIds: number[] = [];
+    // const speakerUserIds: number[] = [];
 
     const allChipKeyData: CreateChipKeyData[] = [];
     const allUserData: PrecreateUserData[] = [];
-    const allLocationData: CreateLocationData[] = [];
+    // const allLocationData: CreateLocationData[] = [];
 
-    let totalIndex = 1;
-    let userIndex = 1;
-    let locationIndex = 1;
-    for (const chipId of keyUids) {
+    const newKeyUids = [];
+    for (let i = 1; i <= 50; i++) {
+      newKeyUids.push("CURSIVE" + i.toString().padStart(2, "0"));
+    }
+
+    for (const chipId of newKeyUids) {
       // Generate and save signing keypair
       const { signingKey, verifyingKey } = generateSignatureKeyPair();
       allChipKeyData.push({
@@ -80,8 +81,6 @@ export default async function handler(
         signaturePublicKey: verifyingKey,
         psiPublicKeysLink: "",
       });
-      allUserIds.push(userIndex);
-      userIndex++;
     }
 
     // Create all chip keys
@@ -95,58 +94,58 @@ export default async function handler(
     });
 
     // Create all locations
-    await prisma.location.createMany({
-      data: allLocationData,
-    });
+    // await prisma.location.createMany({
+    //   data: allLocationData,
+    // });
 
     // BEGIN HARDCODED QUESTS FOR SIG SING WORKSHOP
     // Quest 1: Meet 10 attendees
-    await prisma.quest.create({
-      data: {
-        name: "🦋 Social Butterfly",
-        description:
-          "Connect with 10 people to make this proof. Ask to tap their ring, share socials, and discover event activity that you have in common.",
-        userRequirements: {
-          create: [
-            {
-              name: "Connect with 10 people at SigSing",
-              numSigsRequired: 10,
-              sigNullifierRandomness: getServerRandomNullifierRandomness(), // Ensures signatures cannot be reused to meet this requirement
-              users: {
-                connect: allUserIds.map((id) => ({ id })),
-              },
-            },
-          ],
-        },
-        locationRequirements: {
-          create: [],
-        },
-      },
-    });
+    // await prisma.quest.create({
+    //   data: {
+    //     name: "🦋 Social Butterfly",
+    //     description:
+    //       "Connect with 10 people to make this proof. Ask to tap their ring, share socials, and discover event activity that you have in common.",
+    //     userRequirements: {
+    //       create: [
+    //         {
+    //           name: "Connect with 10 people at SigSing",
+    //           numSigsRequired: 10,
+    //           sigNullifierRandomness: getServerRandomNullifierRandomness(), // Ensures signatures cannot be reused to meet this requirement
+    //           users: {
+    //             connect: allUserIds.map((id) => ({ id })),
+    //           },
+    //         },
+    //       ],
+    //     },
+    //     locationRequirements: {
+    //       create: [],
+    //     },
+    //   },
+    // });
 
     // Quest 2: Meet 3 speakers
-    await prisma.quest.create({
-      data: {
-        name: "🎤 Engage the speakers",
-        description:
-          "Ask 3 speakers a question or share feedback about their talk. Ask to tap their ring to collect a link to their presentation slides (if available)",
-        userRequirements: {
-          create: [
-            {
-              name: "Connect with 3 speakers at the Sig Sing workshop",
-              numSigsRequired: 3,
-              sigNullifierRandomness: getServerRandomNullifierRandomness(), // Ensures signatures cannot be reused to meet this requirement
-              users: {
-                connect: speakerUserIds.map((id) => ({ id })),
-              },
-            },
-          ],
-        },
-        locationRequirements: {
-          create: [],
-        },
-      },
-    });
+    // await prisma.quest.create({
+    //   data: {
+    //     name: "🎤 Meet the speakers",
+    //     description:
+    //       "Ask 3 speakers a question or share feedback about their talk. Ask to tap their ring to collect a link to their presentation slides (if available)",
+    //     userRequirements: {
+    //       create: [
+    //         {
+    //           name: "Connect with 3 speakers at the Sig Sing workshop",
+    //           numSigsRequired: 3,
+    //           sigNullifierRandomness: getServerRandomNullifierRandomness(), // Ensures signatures cannot be reused to meet this requirement
+    //           users: {
+    //             connect: speakerUserIds.map((id) => ({ id })),
+    //           },
+    //         },
+    //       ],
+    //     },
+    //     locationRequirements: {
+    //       create: [],
+    //     },
+    //   },
+    // });
 
     // Quest 3: Attend 5 talks
     // await prisma.quest.create({
