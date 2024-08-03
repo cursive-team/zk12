@@ -12,7 +12,6 @@ import { supabase } from "@/lib/client/realtime";
 import { Button } from "./Button";
 import { LINKS } from "@/hooks/useSettings";
 import { cn } from "@/lib/client/utils";
-import { IndexDBWrapper } from "@/lib/client/indexDB";
 
 const Title = classed.h3("block font-sans text-iron-950", {
   variants: {
@@ -249,9 +248,6 @@ interface AppHeaderProps {
 const AppHeader = ({ isMenuOpen, setIsMenuOpen }: AppHeaderProps) => {
   const { actions, getState } = useStateMachine({ updateStateFromAction });
   const handleSignout = async () => {
-    const db = new IndexDBWrapper();
-    await db.init();
-    await db.logoutIndexDB();
     deleteAccountFromLocalStorage();
     supabase.auth.signOut();
     window.location.href = "/";
