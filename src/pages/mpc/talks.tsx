@@ -362,7 +362,7 @@ export default function Talks() {
             {output === OutputState.SHOW_RESULTS && (
               <div className="text-black">
                 {avgResults.map((el, ind) => (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-4" key={ind}>
                     {`#${ind + 1} `}
                     {fruits[el % fruits.length]}
                   </div>

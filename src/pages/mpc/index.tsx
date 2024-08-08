@@ -47,9 +47,9 @@ export default function MPCPage() {
                   3️⃣ Top 3 Talks
                 </Card.Title>
                 <span className="text-xs font-iron-600 font-sans">
-                  Rate some talks, only reveal the top 3 after everyone votes.
+                  {`Rate some talks, only reveal the top 3 after everyone votes.
                   Learn about which ones were most successful without putting
-                  down other speakers.
+                  down other speakers.`}
                 </span>
               </div>
             </div>
@@ -66,9 +66,9 @@ export default function MPCPage() {
                   ✨ Karma Calculator
                 </Card.Title>
                 <span className="text-xs font-iron-600 font-sans">
-                  Update each other's karma privately, only reveal the net karma
+                  {`Update each other's karma privately, only reveal the net karma
                   given/received at the end of the round. Inspired by Barry &
-                  CC.
+                  CC.`}
                 </span>
               </div>
             </div>

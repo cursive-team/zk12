@@ -286,8 +286,8 @@ export default function Karma() {
               ✨ Karma Calculator
             </span>
             <span className="text-iron-600 text-sm font-normal">
-              Update each other's karma privately, only reveal the net karma
-              given/received at the end of the round. Inspired by Barry & CC.
+              {`Update each other's karma privately, only reveal the net karma
+              given/received at the end of the round. Inspired by Barry & CC.`}
             </span>
           </div>
           <div className="flex flex-col gap-1">
@@ -365,8 +365,8 @@ export default function Karma() {
           </span>
           <div className="flex flex-col gap-2">
             <span className="text-iron-600 text-sm font-normal">
-              Update each other's karma privately, only reveal the net karma
-              given/received at the end of the round. Inspired by Barry & CC.
+              {`Update each other's karma privately, only reveal the net karma
+              given/received at the end of the round. Inspired by Barry & CC.`}
             </span>
             <span className="text-iron-600 text-sm font-normal">
               {`Find a group of 3 or more people 

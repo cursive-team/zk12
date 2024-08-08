@@ -515,7 +515,7 @@ const UserProfilePage = () => {
                 "Overlap computed at the time you both opted into "
               ) : (
                 <>
-                  If you both press "Discover" <b>at the same time</b> you can
+                  If you both discover overlap <b>at the same time</b> you can
                   privately compute any overlap using
                 </>
               )}
