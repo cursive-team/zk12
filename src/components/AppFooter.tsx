@@ -51,7 +51,7 @@ const AppFooter = () => {
       iconSize: 14,
     },
     {
-      label: "MPC",
+      label: "Queries",
       href: "/mpc",
       icon: Icons.Social,
       iconSize: 14,

@@ -11,12 +11,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { authToken, roomId, password } = JSON.parse(req.body);
-
-  const userId = await verifyAuthToken(authToken);
-  if (!userId) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
+  const { roomId, password, displayName } = JSON.parse(req.body);
 
   try {
     const room = await prisma.room.findUnique({
@@ -43,7 +38,7 @@ export default async function handler(
     await prisma.roomMember.create({
       data: {
         roomId,
-        userId,
+        displayName,
       },
     });
 

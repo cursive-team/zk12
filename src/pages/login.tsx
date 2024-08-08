@@ -189,18 +189,21 @@ export default function Login() {
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
         />
-        <Button type="submit">
-          {loading ? "Logging in..." : "Login with passkey"}
-        </Button>
-        <Button
-          variant="transparent"
-          onClick={(e) => {
-            e.preventDefault();
-            handlePasswordLogin();
-          }}
-        >
-          Login with password instead
-        </Button>
+
+        <div className="flex flex-col gap-4">
+          <Button type="submit">
+            {loading ? "Logging in..." : "Login with passkey"}
+          </Button>
+          <span
+            className="text-center text-sm"
+            onClick={(e) => {
+              e.preventDefault();
+              handlePasswordLogin();
+            }}
+          >
+            <u>Login with password instead</u>
+          </span>
+        </div>
       </FormStepLayout>
     );
   } else if (displayState === DisplayState.PASSWORD) {
@@ -227,10 +230,13 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button type="submit">{loading ? "Logging in..." : "Login"}</Button>
-        <Button variant="transparent" onClick={handlePasskeyLogin}>
-          Login with passkey instead
-        </Button>
+
+        <div className="flex flex-col gap-4">
+          <Button type="submit">{loading ? "Logging in..." : "Login"}</Button>
+          <span className="text-center text-sm" onClick={handlePasskeyLogin}>
+            <u>Login with passkey instead</u>
+          </span>
+        </div>
       </FormStepLayout>
     );
   }

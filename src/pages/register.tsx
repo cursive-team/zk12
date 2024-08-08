@@ -396,11 +396,8 @@ export default function Register() {
           <div className="flex flex-col gap-2">
             <div>
               Tap NFC rings to build your social graph, use MPC to query
-              efficiently.
-            </div>
-            <div>
-              Set up socials to share, register to maintain an encrypted backup
-              of your data.
+              efficiently. Set up socials to share, register to maintain an
+              encrypted backup of your data.
             </div>
           </div>
         }
@@ -410,7 +407,7 @@ export default function Register() {
         <Input
           type="text"
           id="displayName"
-          label="Display name (*)"
+          label="Display name*"
           placeholder="Name others will see upon tap"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
@@ -431,23 +428,9 @@ export default function Register() {
         />
         <Input
           type="text"
-          id="telegram"
-          label="Daimo"
-          placeholder="@username"
-          value={telegram}
-          onChange={(e) =>
-            setTelegram(
-              e.target.value.charAt(0) === "@"
-                ? e.target.value
-                : "@" + e.target.value
-            )
-          }
-        />
-        <Input
-          type="text"
           id="bio"
           label="Bio"
-          placeholder="Your organization, website, other info"
+          placeholder="Your organization, website, etc."
           value={bio}
           onChange={(e) => setBio(e.target.value)}
         />
@@ -494,12 +477,17 @@ export default function Register() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <Button type="submit" loading={loading}>
-          Register
-        </Button>
-        <span className="text-center text-sm" onClick={handleCreateWithPasskey}>
-          <u>Register with passkey instead</u>
-        </span>
+        <div className="flex flex-col gap-4">
+          <Button type="submit" loading={loading}>
+            Register
+          </Button>
+          <span
+            className="text-center text-sm"
+            onClick={handleCreateWithPasskey}
+          >
+            <u>Register with passkey instead</u>
+          </span>
+        </div>
       </FormStepLayout>
     ),
     [DisplayState.CREATING]: (

@@ -11,14 +11,6 @@ const nextConfig = {
     };
     return config;
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-      },
-    ],
-  },
   headers: async () => {
     // needed to allow calls by wasm to remote resources
     return [

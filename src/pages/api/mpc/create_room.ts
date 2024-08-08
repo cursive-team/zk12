@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/server/prisma";
-import { verifyAuthToken } from "@/lib/server/auth";
 import { ErrorResponse, EmptyResponse } from "@/types";
 
 export default async function handler(
@@ -11,12 +10,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { authToken, name, numParties, password } = JSON.parse(req.body);
-
-  const userId = await verifyAuthToken(authToken);
-  if (!userId) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
+  const { name, numParties, password, displayName } = JSON.parse(req.body);
 
   try {
     const existingRoom = await prisma.room.findMany({
@@ -33,7 +27,6 @@ export default async function handler(
       data: {
         name,
         numParties,
-        creatorId: userId,
         password: password,
       },
     });
@@ -41,7 +34,7 @@ export default async function handler(
     await prisma.roomMember.create({
       data: {
         roomId: room.id,
-        userId,
+        displayName,
       },
     });
 
