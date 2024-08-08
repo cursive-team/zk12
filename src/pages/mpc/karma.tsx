@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { AppBackHeader } from "@/components/AppHeader";
 import { Button } from "@/components/Button";
 /* @ts-ignore */
-import { JIFFClient, JIFFClientBigNumber } from "jiff-mpc";
+import { JIFFClient, JIFFClientNegative, JIFFClientBigNumber } from "jiff-mpc";
 import { toast } from "sonner";
 import { BigNumber } from "bignumber.js";
-import Rating from "@mui/material/Rating";
+import Slider from "@mui/material/Slider";
 import { Input } from "@/components/Input";
 import { Room, RoomMember } from "@prisma/client";
 import { Spinner } from "@/components/Spinner";
@@ -35,38 +35,23 @@ const Title = classed.h3("block font-sans text-iron-950", {
 
 const Description = classed.span("text-md text-iron-600 leading-5");
 
-const fruits = [
-  "Apple",
-  "Banana",
-  "Cherry",
-  "Date",
-  "Elderberry",
-  "Fig",
-  "Grape",
-  "Honeydew",
-  "Kiwi",
-  "Lemon",
-];
-
-export default function Fruits() {
+export default function Karma() {
   const [createRoomName, setCreateRoomName] = useState<string>();
-  const [createRoomPassword, setCreateRoomPassword] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>("");
   const [createRoomPartyCount, setCreateRoomPartyCount] = useState<number>();
-  const [hasCreatedRoom, setHasCreatedRoom] = useState<boolean>(false);
   const [roomName, setRoomName] = useState<string>();
   const [allRooms, setAllRooms] = useState<
     Record<string, Room & { members: RoomMember[] }>
   >({});
   const [jiffClient, setJiffClient] = useState<typeof JIFFClient | null>(null);
-  const [ratings, setRatings] = useState<number[]>(
-    Array(fruits.length).fill(0)
-  );
   const [output, setOutput] = useState<OutputState>(OutputState.NOT_CONNECTED);
-  const [avgResults, setAvgResults] = useState<number[]>([]);
-  const [stdResults, setStdResults] = useState<number[]>([]);
+  const [karmaResults, setKarmaResults] = useState<number[]>([]);
   const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
   const [loadingCreateRoom, setLoadingCreateRoom] = useState<boolean>(false);
   const [loadingJoin, setLoadingJoin] = useState<number>();
+
+  const [names, setNames] = useState<string[]>([]);
+  const [karmas, setKarmas] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -81,7 +66,7 @@ export default function Fruits() {
       );
       setCreateRoomName(undefined);
       setCreateRoomPartyCount(undefined);
-      setCreateRoomPassword("");
+      setDisplayName("");
       setLoadingRooms(false);
       setAllRooms(roomsMapping);
     };
@@ -95,7 +80,7 @@ export default function Fruits() {
       return toast.error("Please fill in all fields");
     }
 
-    const newRoomName = "FRUIT-" + createRoomName;
+    const newRoomName = "KARMA-" + createRoomName;
 
     if (createRoomPartyCount < 2) {
       setLoadingCreateRoom(false);
@@ -112,7 +97,8 @@ export default function Fruits() {
       body: JSON.stringify({
         name: newRoomName,
         numParties: createRoomPartyCount,
-        password: createRoomPassword,
+        password: "",
+        displayName,
       }),
     });
 
@@ -128,8 +114,7 @@ export default function Fruits() {
       );
       setAllRooms(roomsMapping);
       setRoomName(newRoomName);
-      setHasCreatedRoom(true);
-      connect(newRoomName, createRoomPartyCount);
+      connect(newRoomName, roomsMapping[newRoomName].id, createRoomPartyCount);
       toast.success("Room created successfully");
     } else {
       const { error } = await response.json();
@@ -138,7 +123,7 @@ export default function Fruits() {
     setLoadingCreateRoom(false);
   };
 
-  const connect = (roomName: string, numParties: number) => {
+  const connect = (roomName: string, roomId: number, numParties: number) => {
     if (!roomName || numParties < 2) {
       toast.error("Please enter a valid room name and party count.");
       return;
@@ -166,117 +151,95 @@ export default function Fruits() {
           }
           setOutput(OutputState.ERROR);
         },
-        onConnect: () => {
+        onConnect: async () => {
           console.log("Connected to server");
+
+          const response = await fetch(
+            `/api/mpc/get_room_names?roomId=${roomId}`
+          );
+          const { roomNames } = await response.json();
+          if (!roomNames) {
+            setOutput(OutputState.ERROR);
+            return;
+          }
+          console.log(roomNames);
+          setNames(roomNames);
+          setKarmas(new Array(numParties).fill(0));
           setOutput(OutputState.CONNECTED);
         },
       }
     );
 
     client.apply_extension(JIFFClientBigNumber, {});
+    client.apply_extension(JIFFClientNegative, {});
     client.connect();
     setOutput(OutputState.AWAITING_OTHER_PARTIES_CONNECTION);
     setJiffClient(client);
   };
 
   const submit = async () => {
-    if (ratings.some((rating) => rating < 1 || rating > 5)) {
-      toast.error("All ratings must be between 1 and 5.");
+    if (!karmas) {
+      toast.error("Please update everyone's karma.");
       return;
     }
 
     setOutput(OutputState.AWAITING_OTHER_PARTIES_INPUTS);
 
+    if (karmas.length !== jiffClient.party_count) {
+      toast.error("Error with karma data. Please restart.");
+      return;
+    }
+
     if (jiffClient) {
-      console.log(`Beginning MPC with ratings ${ratings}`);
-      let shares = await jiffClient.share_array(ratings);
+      console.log(`Beginning MPC with karmas ${karmas}`);
+      let shares = await jiffClient.share_array(karmas);
       console.log("Shares: ", shares);
       setOutput(OutputState.COMPUTING);
 
       // Start average computation
-      const startAverageTime = Date.now();
+      const startKarmaTime = Date.now();
 
-      let sumShares: any[] = [];
-      for (let i = 1; i <= jiffClient.party_count; i++) {
-        for (let j = 0; j < fruits.length; j++) {
-          if (i === 1) {
-            sumShares.push(shares[i][j]);
+      let rowSumShares: any[] = [];
+      let colSumShares: any[] = [];
+
+      for (let j = 0; j < jiffClient.party_count; j++) {
+        for (let i = 1; i <= jiffClient.party_count; i++) {
+          if (j === 0) {
+            colSumShares.push(shares[i][j]);
           } else {
-            sumShares[j] = sumShares[j].sadd(shares[i][j]);
+            colSumShares[i - 1] = colSumShares[i - 1].sadd(shares[i][j]);
           }
         }
       }
 
-      // for (let k = 0; k < sumShares.length; k++) {
-      //   sumShares[k] = sumShares[k].cdiv(jiffClient.party_count);
-      // }
-      // console.log("Averaged Sum Shares: ", sumShares);
-
-      const sumResults = await Promise.all(
-        sumShares.map((share: any) => jiffClient.open(share))
-      );
-      console.log("Sum Results: ", sumResults);
-      const averageResults = sumResults.map(
-        (result: BigNumber) => result.toNumber() / jiffClient.party_count
-      );
-      console.log("Average Results: ", averageResults);
-
-      const averageTime = Date.now() - startAverageTime;
-      console.log("Average Time: ", averageTime);
-
-      // Start standard deviation computation
-      const startStdTime = Date.now();
-
-      let squaredSumShares: any[] = [];
-      for (let i = 0; i < sumShares.length; i++) {
-        squaredSumShares.push(sumShares[i].smult(sumShares[i]));
-      }
-
-      let sumOfSquaresShares: any[] = [];
       for (let i = 1; i <= jiffClient.party_count; i++) {
-        for (let j = 0; j < sumShares.length; j++) {
-          const shareSquared = shares[i][j].smult(shares[i][j]);
+        for (let j = 0; j < jiffClient.party_count; j++) {
           if (i === 1) {
-            sumOfSquaresShares.push(shareSquared);
+            rowSumShares.push(shares[i][j]);
           } else {
-            sumOfSquaresShares[j] = sumOfSquaresShares[j].sadd(shareSquared);
+            rowSumShares[j] = rowSumShares[j].sadd(shares[i][j]);
           }
         }
       }
-      for (let k = 0; k < sumOfSquaresShares.length; k++) {
-        sumOfSquaresShares[k] = sumOfSquaresShares[k].cmult(
-          jiffClient.party_count
-        );
-      }
 
-      let stdResultShares: any[] = [];
-      for (let i = 0; i < sumShares.length; i++) {
-        const squaredSum = squaredSumShares[i];
-        const sumOfSquares = sumOfSquaresShares[i];
-        const stdResult = sumOfSquares.ssub(squaredSum);
-        stdResultShares.push(stdResult);
-      }
-
-      const rawStdResults = await Promise.all(
-        stdResultShares.map((diff: any) => jiffClient.open(diff))
+      const rowResults = await Promise.all(
+        rowSumShares.map((share: any) => jiffClient.open(share))
       );
-      const stdResults = rawStdResults.map((result: BigNumber) =>
-        Math.sqrt(
-          result.toNumber() /
-            (jiffClient.party_count * (jiffClient.party_count - 1))
-        )
+      const colResults = await Promise.all(
+        colSumShares.map((share: any) => jiffClient.open(share))
       );
-      console.log("Std Results:", stdResults);
+      console.log("Row Results: ", rowResults);
+      console.log("Col Results: ", colResults);
 
-      const stdTime = Date.now() - startStdTime;
-      console.log("Std Time: ", stdTime);
+      const karmaTime = Date.now() - startKarmaTime;
+      console.log("Karma Time: ", karmaTime);
 
-      setAvgResults(averageResults);
-      setStdResults(stdResults);
+      const karmaResults = rowResults.map(
+        (rowResult, index) => rowResult - colResults[index]
+      );
+      setKarmaResults(karmaResults);
       setOutput(OutputState.SHOW_RESULTS);
-      toast.success(
-        `MPC runtime: ${averageTime}ms for average, ${stdTime}ms for standard deviation`
-      );
+      toast.success(`MPC runtime: ${karmaTime}ms`);
     }
   };
 
@@ -293,7 +256,7 @@ export default function Fruits() {
       case OutputState.COMPUTING:
         return "Computing...";
       case OutputState.SHOW_RESULTS:
-        return "The fruits have been rated by the crowd!";
+        return "Karma has been assigned.";
       case OutputState.ERROR:
         return "Error - please try again";
     }
@@ -320,10 +283,12 @@ export default function Fruits() {
         <div className="flex flex-col gap-6 h-modal">
           <div className="flex flex-col gap-4">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
-              🍎 Rate fruits
+              ✨ Karma Calculator
             </span>
-            <span className="text-iron-600 text-sm font-normal">{`Rate some fruits with your friends, discover how aligned you
-                      are without revealing any specific votes.`}</span>
+            <span className="text-iron-600 text-sm font-normal">
+              {`Update each other's karma privately, only reveal the net karma
+              given/received at the end of the round. Inspired by Barry & CC.`}
+            </span>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
@@ -334,19 +299,30 @@ export default function Fruits() {
           <div>
             {output === OutputState.CONNECTED && (
               <div className="mb-16">
-                {fruits.map((fruit, index) => (
+                {names.map((name, index) => (
                   <div key={index} className="mb-4">
-                    <label className="block text-black mb-2">{fruit}</label>
-                    <Rating
-                      name={`rating-${index}`}
-                      value={ratings[index]}
-                      onChange={(event, newValue) => {
-                        const newRatings = [...ratings];
-                        newRatings[index] = newValue || 0;
-                        setRatings(newRatings);
-                      }}
-                      max={5}
-                    />
+                    <label className="block text-black mb-2">{name}</label>
+                    <div className="mx-4">
+                      <Slider
+                        name={`karma-${index}`}
+                        value={karmas[index]}
+                        onChange={(event, newValue) => {
+                          const newRatings = [...karmas];
+                          newRatings[index] = Array.isArray(newValue)
+                            ? newValue[0] || 0
+                            : newValue || 0;
+                          setKarmas(newRatings);
+                        }}
+                        min={-100}
+                        max={100}
+                        marks={[
+                          { value: -100, label: "-100" },
+                          { value: 0, label: "0" },
+                          { value: 100, label: "100" },
+                        ]}
+                        valueLabelDisplay="auto"
+                      />
+                    </div>
                   </div>
                 ))}
                 <Button onClick={submit}>Submit</Button>
@@ -355,22 +331,18 @@ export default function Fruits() {
             {output === OutputState.SHOW_RESULTS && (
               <div className="text-black">
                 <div className="flex flex-col gap-4">
-                  {fruits
-                    .map((fruit, index) => ({
-                      fruit,
-                      rating: avgResults[index],
+                  {names
+                    .map((name, index) => ({
+                      name,
+                      karma: karmaResults[index],
                     }))
-                    .sort((a, b) => b.rating - a.rating)
-                    .map(({ fruit, rating }, index) => (
+                    .sort((a, b) => b.karma - a.karma)
+                    .map(({ name, karma }, index) => (
                       <div
                         className="flex flex-row align-center gap-2"
                         key={index}
                       >
-                        {`${fruit} `}
-                        <Rating value={rating} readOnly precision={0.01} />
-                        {`(${rating.toFixed(1)}, std: ${stdResults[
-                          fruits.indexOf(fruit)
-                        ].toFixed(2)})`}
+                        {`${name}, Karma: ${karma}`}
                       </div>
                     ))}
                 </div>
@@ -389,12 +361,12 @@ export default function Fruits() {
       <div className="flex flex-col gap-6 h-modal">
         <div className="flex flex-col gap-4">
           <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
-            🍎 Rate fruits
+            ✨ Karma Calculator
           </span>
           <div className="flex flex-col gap-2">
             <span className="text-iron-600 text-sm font-normal">
-              {`Rate some fruits with your friends, discover how aligned you
-              are without revealing any specific votes.`}
+              {`Update each other's karma privately, only reveal the net karma
+              given/received at the end of the round. Inspired by Barry & CC.`}
             </span>
             <span className="text-iron-600 text-sm font-normal">
               {`Find a group of 3 or more people 
@@ -411,7 +383,7 @@ export default function Fruits() {
               ) : Object.values(allRooms).filter(
                   (room) =>
                     room.members.length < room.numParties &&
-                    room.name.startsWith("FRUIT-")
+                    room.name.startsWith("KARMA-")
                 ).length === 0 ? (
                 <span className="text-iron-600 text-sm font-normal">
                   No rooms available
@@ -419,7 +391,7 @@ export default function Fruits() {
               ) : (
                 Object.values(allRooms).map((room) =>
                   room.members.length < room.numParties &&
-                  room.name.startsWith("FRUIT-") ? (
+                  room.name.startsWith("KARMA-") ? (
                     <div
                       key={room.id}
                       className="flex items-center justify-between"
@@ -437,12 +409,12 @@ export default function Fruits() {
                           }
                           loading={loadingJoin === room.id}
                           onClick={async () => {
-                            let password = window.prompt(
-                              "Enter room password."
-                            );
+                            let chosenDisplayName = null;
 
-                            if (password === null) {
-                              password = "";
+                            while (chosenDisplayName === null) {
+                              chosenDisplayName = window.prompt(
+                                "Enter your display name."
+                              );
                             }
 
                             setLoadingJoin(room.id);
@@ -451,7 +423,8 @@ export default function Fruits() {
                               method: "POST",
                               body: JSON.stringify({
                                 roomId: room.id,
-                                password: password,
+                                password: "",
+                                displayName: chosenDisplayName,
                               }),
                             });
                             if (!response.ok) {
@@ -461,8 +434,7 @@ export default function Fruits() {
                             }
 
                             setRoomName(room.name);
-                            setHasCreatedRoom(false);
-                            connect(room.name, room.numParties);
+                            connect(room.name, room.id, room.numParties);
                             setLoadingJoin(undefined);
                           }}
                         >
@@ -497,9 +469,9 @@ export default function Fruits() {
               }
             />
             <Input
-              label="Password"
-              value={createRoomPassword}
-              onChange={(e) => setCreateRoomPassword(e.target.value)}
+              label="Your display name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
             />
             <Button onClick={handleCreateRoom} loading={loadingCreateRoom}>
               Create
@@ -511,6 +483,6 @@ export default function Fruits() {
   );
 }
 
-Fruits.getInitialProps = () => {
+Karma.getInitialProps = () => {
   return { showHeader: false, showFooter: false };
 };

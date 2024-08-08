@@ -4,7 +4,6 @@ import { Button } from "@/components/Button";
 /* @ts-ignore */
 import { JIFFClient, JIFFClientBigNumber } from "jiff-mpc";
 import { toast } from "sonner";
-import { BigNumber } from "bignumber.js";
 import Rating from "@mui/material/Rating";
 import { Input } from "@/components/Input";
 import { getAuthToken } from "@/lib/client/localStorage";
@@ -108,15 +107,9 @@ export default function Talks() {
       return toast.error("Room name cannot contain whitespace");
     }
 
-    const authToken = getAuthToken();
-    if (!authToken) {
-      return toast.error("Please login to create a room");
-    }
-
     const response = await fetch("/api/mpc/create_room", {
       method: "POST",
       body: JSON.stringify({
-        authToken: authToken.value,
         name: newRoomName,
         numParties: createRoomPartyCount,
         password: createRoomPassword,
@@ -186,8 +179,12 @@ export default function Talks() {
     setJiffClient(client);
   };
 
+  /**
+   * MPC sorts
+   */
+
   const mpcBubbleSort = (arr: any[]) => {
-    for (let i = 0; i < arr.length; i++) {
+    for (let i = 0; i < 3; i++) {
       for (let j = 0; j < arr.length - i - 1; j++) {
         const a = arr[j];
         const b = arr[j + 1];
@@ -199,10 +196,6 @@ export default function Talks() {
 
     return arr;
   };
-
-  /**
-   * The MPC computation
-   */
 
   function oddEvenSort(a: any, lo: any, n: any) {
     if (n > 1) {
@@ -275,10 +268,13 @@ export default function Talks() {
         sumShares[j] = sumShares[j].cadd(j);
       }
 
-      oddEvenSort(sumShares, 0, sumShares.length);
+      mpcBubbleSort(sumShares);
 
       const results = await Promise.all(
-        sumShares.slice(-3).map((share: any) => jiffClient.open(share))
+        sumShares
+          .slice(-3)
+          .reverse()
+          .map((share: any) => jiffClient.open(share))
       );
 
       const averageTime = Date.now() - startAverageTime;
@@ -289,21 +285,6 @@ export default function Talks() {
       toast.success(`MPC runtime: ${averageTime}`);
 
       console.log("ending", hasCreatedRoom);
-      if (hasCreatedRoom) {
-        try {
-          const authToken = getAuthToken();
-
-          await fetch("/api/mpc/expire_room", {
-            method: "POST",
-            body: JSON.stringify({
-              authToken: authToken!.value,
-              roomId: allRooms[roomName!].id,
-            }),
-          });
-        } catch (error) {
-          console.error("Submitting ratings failed", error);
-        }
-      }
     }
   };
 
@@ -345,7 +326,7 @@ export default function Talks() {
         />
 
         <div className="flex flex-col gap-6 h-modal">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
               {`📓 Find your group's top 3 talks`}
             </span>
@@ -353,7 +334,7 @@ export default function Talks() {
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
-              {roomName}
+              {roomName.slice(6)}
             </span>
             <Description>{getButtonDisplay()}</Description>
           </div>
@@ -380,9 +361,12 @@ export default function Talks() {
             )}
             {output === OutputState.SHOW_RESULTS && (
               <div className="text-black">
-                <div className="flex flex-col gap-4">
-                  {avgResults.map((el) => fruits[el % 10]).join(", ")}
-                </div>
+                {avgResults.map((el, ind) => (
+                  <div className="flex flex-col gap-4" key={ind}>
+                    {`#${ind + 1} `}
+                    {fruits[el % fruits.length]}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -396,7 +380,7 @@ export default function Talks() {
       <AppBackHeader />
 
       <div className="flex flex-col gap-6 h-modal">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
             {`📓 Find your group's top 3 talks`}
           </span>
@@ -417,7 +401,11 @@ export default function Talks() {
             <div className="flex flex-col gap-2">
               {loadingRooms ? (
                 <Spinner />
-              ) : Object.values(allRooms).length === 0 ? (
+              ) : Object.values(allRooms).filter(
+                  (room) =>
+                    room.members.length < room.numParties &&
+                    room.name.startsWith("TALKS-")
+                ).length === 0 ? (
                 <span className="text-iron-600 text-sm font-normal">
                   No rooms available
                 </span>
@@ -430,8 +418,8 @@ export default function Talks() {
                       className="flex items-center justify-between"
                     >
                       <Description>
-                        {room.name} ({room.members.length}/{room.numParties}{" "}
-                        members)
+                        {room.name.slice(6)} ({room.members.length}/
+                        {room.numParties} members)
                       </Description>
                       <div className="max-w-[100px] ml-auto py-2">
                         <Button
@@ -451,15 +439,10 @@ export default function Talks() {
                             }
 
                             setLoadingJoin(room.id);
-                            const authToken = getAuthToken();
-                            if (!authToken) {
-                              return toast.error("Please login to join a room");
-                            }
 
                             const response = await fetch("/api/mpc/join_room", {
                               method: "POST",
                               body: JSON.stringify({
-                                authToken: authToken.value,
                                 roomId: room.id,
                                 password: password,
                               }),

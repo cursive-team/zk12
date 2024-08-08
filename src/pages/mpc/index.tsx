@@ -12,33 +12,6 @@ import { useQuestRequirements } from "@/hooks/useQuestRequirements";
 import { Card } from "@/components/cards/Card";
 
 export default function MPCPage() {
-  const pinnedQuests = useRef<Set<number>>(getPinnedQuest());
-  const { isLoading, data: allQuests = [] } = useFetchQuests();
-
-  const displayQuests: QuestWithCompletion[] = useMemo(() => {
-    const unorderedQuests = allQuests.filter((quest) => !quest.isHidden);
-    const quests = unorderedQuests.sort((a, b) => b.priority - a.priority);
-    // We want to restrict proofs to have one requirement
-    const singleRequirementQuests = quests.filter(
-      (quest) =>
-        (quest.userRequirements.length === 1 &&
-          quest.locationRequirements.length === 0) ||
-        (quest.locationRequirements.length === 1 &&
-          quest.userRequirements.length === 0)
-    );
-
-    const pinnedQuest = singleRequirementQuests.filter((quest) =>
-      pinnedQuests.current.has(quest.id)
-    );
-    const notPinnedQuest = singleRequirementQuests.filter(
-      (quest) => !pinnedQuests.current.has(quest.id)
-    );
-
-    return [...pinnedQuest, ...notPinnedQuest];
-  }, [allQuests, pinnedQuests]);
-
-  const { numRequirementsSatisfied } = useQuestRequirements(displayQuests);
-
   return (
     <div className="flex flex-col gap-4 pt-4">
       <span className="text-iron-600 font-sans text-xs">
@@ -56,8 +29,8 @@ export default function MPCPage() {
                 </Card.Title>
                 <span className="text-xs font-iron-600 font-sans">
                   Rate some fruits with your friends, discover how aligned you
-                  are without revealing any specific votes. Votes happen in
-                  batches of 10.
+                  are. Computes average and standard deviation without revealing
+                  individual ratings.
                 </span>
               </div>
             </div>
@@ -74,9 +47,28 @@ export default function MPCPage() {
                   3️⃣ Top 3 Talks
                 </Card.Title>
                 <span className="text-xs font-iron-600 font-sans">
-                  Rate some talks, only reveal the top 3 after everyone votes.
+                  {`Rate some talks, only reveal the top 3 after everyone votes.
                   Learn about which ones were most successful without putting
-                  down other speakers.
+                  down other speakers.`}
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card.Base>
+      </Link>
+
+      <Link href={`/mpc/karma`}>
+        <Card.Base className="flex flex-col gap-4 p-3">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2">
+                <Card.Title className="text-iron-950 text-sm font-bold">
+                  ✨ Karma Calculator
+                </Card.Title>
+                <span className="text-xs font-iron-600 font-sans">
+                  {`Update each other's karma privately, only reveal the net karma
+                  given/received at the end of the round. Inspired by Barry &
+                  CC.`}
                 </span>
               </div>
             </div>

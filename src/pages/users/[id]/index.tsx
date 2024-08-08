@@ -515,12 +515,12 @@ const UserProfilePage = () => {
                 "Overlap computed at the time you both opted into "
               ) : (
                 <>
-                  If you both tap Discover <b>at the same time</b> we will
+                  If you both discover overlap <b>at the same time</b> you can
                   privately compute any overlap using
                 </>
               )}
               <a
-                href="https://github.com/cursive-team/2P-PSI/tree/vivek/wasm-2p-psi"
+                href="https://github.com/cursive-team/2P-PSI"
                 target="_blank"
                 rel="noopener noreferrer"
               >

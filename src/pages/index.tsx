@@ -31,6 +31,7 @@ import { IconCircle } from "@/components/IconCircle";
 import { NoResultContent } from "@/components/NoResultContent";
 import { classed } from "@tw-classed/react";
 import { logClientEvent } from "@/lib/client/metrics";
+import { toast } from "sonner";
 
 interface LinkCardProps {
   name: string;
@@ -391,6 +392,7 @@ export default function Social() {
         authToken.expiresAt < new Date()
       ) {
         setLoading(false);
+        toast.error("Need to be registered to view home page.");
         router.push("/register");
         return;
       }

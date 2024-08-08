@@ -73,7 +73,7 @@ const CompleteQuestModal = ({
 
     if (!authToken || authToken.expiresAt < new Date() || !profile || !keys) {
       toast.error("You must be logged in to generate a proof");
-      router.push("/login");
+      router.push("/register");
       return;
     }
 
