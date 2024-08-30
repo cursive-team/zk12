@@ -52,6 +52,7 @@ export default function Register() {
   const [displayName, setDisplayName] = useState<string>();
   const [twitter, setTwitter] = useState<string>("@");
   const [telegram, setTelegram] = useState<string>("@");
+  const [realTg, setRealTg] = useState<string>("@");
   const [bio, setBio] = useState<string>();
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -258,6 +259,11 @@ export default function Register() {
     passwordSalt = generateSalt();
     passwordHash = await hashPassword(password, passwordSalt);
 
+    let realBio = bio;
+    if (realTg !== "@") {
+      realBio = realTg + "|" + (bio ?? "");
+    }
+
     const response = await fetch("/api/register/create_account", {
       method: "POST",
       headers: {
@@ -275,7 +281,7 @@ export default function Register() {
         authPublicKey,
         twitter,
         telegram,
-        bio,
+        bio: realBio,
       }),
     });
 
@@ -407,7 +413,7 @@ export default function Register() {
         <Input
           type="text"
           id="displayName"
-          label="Display name*"
+          label="Display name (required)"
           placeholder="Name others will see upon tap"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
@@ -420,6 +426,34 @@ export default function Register() {
           value={twitter}
           onChange={(e) =>
             setTwitter(
+              e.target.value.charAt(0) === "@"
+                ? e.target.value
+                : "@" + e.target.value
+            )
+          }
+        />
+        <Input
+          type="text"
+          id="tg"
+          label="Telegram"
+          placeholder="@username"
+          value={realTg}
+          onChange={(e) =>
+            setRealTg(
+              e.target.value.charAt(0) === "@"
+                ? e.target.value
+                : "@" + e.target.value
+            )
+          }
+        />
+        <Input
+          type="text"
+          id="daimo"
+          label="Daimo"
+          placeholder="@username"
+          value={telegram}
+          onChange={(e) =>
+            setTelegram(
               e.target.value.charAt(0) === "@"
                 ? e.target.value
                 : "@" + e.target.value

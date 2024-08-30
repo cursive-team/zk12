@@ -32,6 +32,7 @@ interface AppHeaderContentProps {
   isMenuOpen: boolean;
   setIsMenuOpen: (value: boolean) => void;
   handleSignout: () => void;
+  isPreview?: boolean;
 }
 
 interface AppBackHeaderProps {
@@ -82,10 +83,11 @@ export const AppBackHeader = ({
   );
 };
 
-const AppHeaderContent = ({
+export const AppHeaderContent = ({
   isMenuOpen,
   setIsMenuOpen,
   handleSignout,
+  isPreview,
 }: AppHeaderContentProps) => {
   const { actions, getState } = useStateMachine({ updateStateFromAction });
   const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
@@ -97,23 +99,17 @@ const AppHeaderContent = ({
 
   const MenuItems: { label: string; children: ReactNode }[] = [
     {
-      label: "Profile & settings",
-      children: <Profile handleSignout={handleSignout} />,
-    },
-    {
-      label: "About",
+      label: "About this app",
       children: (
         <>
           <ContentWrapper>
-            <Title>About the app</Title>
+            <Title>About Backpocket</Title>
             <Description>
-              This app allows you to verifiably digitize your Signature
-              Signularity residency experience and make provable claims about
-              the people you have met. Every single tap gives you a digital
-              signature representing the fact that you met someone. You can make
-              zk proofs about these signatures, like proving that you met 3
-              residents without revealing who they were or the signatures
-              themselves.
+              This app allows you to verifiably digitize in-person experiences
+              and make ZK provable claims about the people you have met. You can
+              also do a variety of multi-party computation queries, enabling you
+              to learn information about your connections in a safe and
+              efficient way.
             </Description>
             <Description>
               Crucially, all the data you collect in this app is yours - our
@@ -129,10 +125,8 @@ const AppHeaderContent = ({
               >
                 (cursive.team)
               </a>{" "}
-              is a team building applications of signed data. We want to build
-              experiences where people own their data and use it in powerful
-              ways. If this is something you are interested in, please reach
-              out!
+              is a team building cryptography for human connection. If this is
+              something you are interested in, please reach out!
             </Description>
             <Description>
               <Link href={LINKS.GITHUB} target="_blank">
@@ -163,6 +157,38 @@ const AppHeaderContent = ({
       ),
     },
   ];
+
+  if (isPreview === undefined) {
+    MenuItems.unshift({
+      label: "Profile & settings",
+      children: <Profile handleSignout={handleSignout} />,
+    });
+  }
+
+  if (isPreview) {
+    MenuItems.push({
+      label: "Register",
+      children: (
+        <ContentWrapper>
+          <Title>Register</Title>
+          <Description>
+            Once you register, you will need to retap the NFC ring to save these
+            socials.
+          </Description>
+          <Description>
+            <Button variant="white" onClick={handleSignout}>
+              <div className="flex w-full items-center justify-between">
+                <span className="text-iron-600 font-semibold text-xs">
+                  Start registration
+                </span>
+                <Icons.ExternalLink className="text-gray-10" />
+              </div>
+            </Button>
+          </Description>
+        </ContentWrapper>
+      ),
+    });
+  }
 
   const onBack = () => {
     if (
@@ -250,7 +276,7 @@ const AppHeader = ({ isMenuOpen, setIsMenuOpen }: AppHeaderProps) => {
   const handleSignout = async () => {
     deleteAccountFromLocalStorage();
     supabase.auth.signOut();
-    window.location.href = "/";
+    window.location.href = "/register";
   };
 
   const toggleMenu = () => {
