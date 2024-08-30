@@ -15,6 +15,8 @@ import {
   fetchUserByUUID,
   getUsers,
   getLocationSignatures,
+  saveUsers,
+  User,
 } from "@/lib/client/localStorage";
 import {
   encryptInboundTapMessage,
@@ -45,8 +47,23 @@ export default function Tap() {
       const keys = getKeys();
 
       if (!authToken || authToken.expiresAt < new Date() || !profile || !keys) {
-        toast.error("You must be logged in to connect");
-        router.push("/register");
+        let users: Record<string, User> = {};
+        users["0"] = {
+          pkId: person.pkId,
+          name: person.displayName,
+          encPk: person.encryptionPublicKey,
+          psiPkLink: person.psiPublicKeysLink,
+          x: person.twitter,
+          tg: person.telegram,
+          bio: person.bio,
+          sigPk: person.signaturePublicKey,
+          msg: person.signatureMessage,
+          sig: person.signature,
+          isSpeaker: person.isUserSpeaker,
+          inTs: new Date().toISOString(),
+        };
+        saveUsers(users);
+        router.push("/preview");
         return;
       }
 
@@ -196,14 +213,7 @@ export default function Tap() {
     };
 
     const handlePersonTap = async (person: PersonTapResponse) => {
-      const authToken = getAuthToken();
-      if (!authToken || authToken.expiresAt < new Date()) {
-        // If user is not logged in, redirect to login
-        router.push("/register");
-        // setPendingPersonTapResponse(person);
-      } else {
-        processPersonTap(person);
-      }
+      processPersonTap(person);
     };
 
     const handleLocationTap = async (location: LocationTapResponse) => {
