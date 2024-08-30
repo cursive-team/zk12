@@ -118,8 +118,11 @@ const UserProfilePage = () => {
   }, [wantsToInitiatePSI, otherUserWantsToInitiatePSI]);
 
   // set up channel for PSI
-  const setupChannel = () => {
-    if (!selfEncPk || !otherEncPk || !channelName) return;
+  const setupChannel = (
+    selfEncPk: string,
+    otherEncPk: string,
+    channelName: string
+  ) => {
     logClientEvent("psiSetupChannel", {});
 
     const channel = supabase.channel(channelName, {
@@ -140,7 +143,7 @@ const UserProfilePage = () => {
       })
       .on("presence", { event: "leave" }, async ({ key }) => {
         if (key === otherEncPk) {
-          console.log("Other user left channel ", otherEncPk);
+          console.log("Other user left channel", otherEncPk);
           setOtherUserTemporarilyLeft(true);
           setOtherUserInChannel(false);
         } else {
@@ -149,7 +152,7 @@ const UserProfilePage = () => {
       })
       .on("broadcast", { event: "initiatePSI" }, async (event) => {
         // only respond to initiatePSI if it's for this user
-        if (event.payload.to !== selfEncPk) return;
+        if (event.payload.to === selfEncPk) return;
         console.log("Other user wants to initiate psi", otherEncPk);
         setOtherUserWantsToInitiatePSI(true);
       })
@@ -434,7 +437,12 @@ const UserProfilePage = () => {
           [fetchedUser.encPk, profile.encryptionPublicKey].sort().join("")
         );
         // always set up channel
-        setupChannel();
+        setupChannel(
+          fetchedUser.encPk,
+          profile.encryptionPublicKey,
+          [fetchedUser.encPk, profile.encryptionPublicKey].sort().join("")
+        );
+
         if (fetchedUser.oI) {
           processOverlap(JSON.parse(fetchedUser.oI));
           setPsiState(PSIState.COMPLETE);
@@ -630,20 +638,15 @@ const UserProfilePage = () => {
               What do you both have in common?
             </span>
             <span className="text-iron-600 text-xs font-normal">
-              {isOverlapComputed ? (
-                "Overlap computed at the time you both opted into "
-              ) : (
-                <>
-                  If you both discover overlap <b>at the same time</b> you can
-                  privately compute any overlap using
-                </>
-              )}
+              <>
+                This feature requires both users to <b>opt in synchronously</b>.
+                Built using{" "}
+              </>
               <a
                 href="https://github.com/cursive-team/2P-PSI"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {" "}
                 <u>2PC + FHE</u>.
               </a>
             </span>
@@ -692,7 +695,7 @@ const UserProfilePage = () => {
                   marginTop: "16px",
                 }}
               >
-                Update
+                Opt-in to update
               </Button>
             </div>
           ) : psiState === PSIState.NOT_STARTED ? (
@@ -704,10 +707,10 @@ const UserProfilePage = () => {
               disabled={!otherUserInChannel}
             >
               {wantsToInitiatePSI
-                ? "Waiting for other user to accept..."
+                ? "Waiting for other user to opt-in..."
                 : otherUserInChannel
-                ? "Discover"
-                : "Waiting for other user to connect..."}
+                ? "Opt-in"
+                : `Tell ${user.name} to go to your profile.`}
             </Button>
           ) : (
             <div className="flex flex-col gap-2">
