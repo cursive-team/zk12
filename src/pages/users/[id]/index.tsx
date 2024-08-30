@@ -413,6 +413,17 @@ const UserProfilePage = () => {
       }
 
       const fetchedUser = fetchUserByUUID(id);
+      const bioMatch = fetchedUser?.bio?.match(/^@(.*)\|/);
+      const realTg = bioMatch ? bioMatch[1] : null;
+      const actualBio = bioMatch
+        ? fetchedUser?.bio?.substring(bioMatch[0].length)
+        : fetchedUser?.bio;
+
+      if (fetchedUser) {
+        fetchedUser.bio = actualBio ?? undefined;
+        fetchedUser.fc = realTg ?? undefined;
+      }
+
       setUser(fetchedUser);
 
       if (fetchedUser) {
@@ -592,6 +603,13 @@ const UserProfilePage = () => {
                   value={labelStartWith(user.x, "@")}
                 />
               )}
+              {(user.fc?.length ?? 0) > 1 && (
+                <LinkCard
+                  label="Telegram"
+                  href={`https://t.me/${removeLabelStartWith(user.fc, "@")}`}
+                  value={labelStartWith(user.fc, "@")}
+                />
+              )}
               {(user.tg?.length ?? 0) > 1 && (
                 <LinkCard
                   label="Daimo"
@@ -600,16 +618,6 @@ const UserProfilePage = () => {
                     "@"
                   )}`}
                   value={labelStartWith(user.tg, "@")}
-                />
-              )}
-              {(user.fc?.length ?? 0) > 1 && (
-                <LinkCard
-                  label="Farcaster"
-                  href={`https://warpcast.com/${removeLabelStartWith(
-                    user.fc,
-                    "@"
-                  )}`}
-                  value={labelStartWith(user.fc, "@")}
                 />
               )}
             </div>
