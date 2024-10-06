@@ -332,17 +332,13 @@ export default function Social() {
                       {users.map((user, index) => {
                         const { name, inTs, bio } = user;
                         const date = inTs ? formatDate(inTs) : "-";
-                        const bioMatch = bio?.match(/^@(.*)\|/);
-                        const actualBio = bioMatch
-                          ? bio?.substring(bioMatch[0].length)
-                          : bio;
 
                         return (
                           <LinkCard
                             key={index}
                             name={name}
                             date={date}
-                            other={actualBio ?? ""}
+                            other={bio ?? ""}
                             href={`/users/${user.uuid}`}
                           />
                         );

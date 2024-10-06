@@ -5,7 +5,7 @@ import { detectIncognito } from "detectincognitojs";
 export const MAX_LEADERBOARD_LENGTH = 100;
 
 export const LINKS = {
-  GITHUB: "https://github.com/cursive-team/ring.backpocket.me",
+  GITHUB: "https://github.com/cursive-team/zk12",
   CURSIVE_SITE: "https://cursive.team",
 };
 

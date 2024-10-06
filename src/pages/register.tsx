@@ -52,7 +52,6 @@ export default function Register() {
   const [displayName, setDisplayName] = useState<string>();
   const [twitter, setTwitter] = useState<string>("@");
   const [telegram, setTelegram] = useState<string>("@");
-  const [realTg, setRealTg] = useState<string>("@");
   const [bio, setBio] = useState<string>();
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -104,7 +103,7 @@ export default function Register() {
     }
 
     if (telegram !== "@" && !telegramUsernameRegex.test(telegram)) {
-      toast.error("Please enter a valid Daimo username.");
+      toast.error("Please enter a valid Telegram username.");
       return;
     }
 
@@ -152,7 +151,7 @@ export default function Register() {
     }
 
     if (telegram !== "@" && !telegramUsernameRegex.test(telegram)) {
-      toast.error("Please enter a valid Daimo username.");
+      toast.error("Please enter a valid Telegram username.");
       return;
     }
 
@@ -259,11 +258,6 @@ export default function Register() {
     passwordSalt = generateSalt();
     passwordHash = await hashPassword(password, passwordSalt);
 
-    let realBio = bio;
-    if (realTg !== "@") {
-      realBio = realTg + "|" + (bio ?? "");
-    }
-
     const response = await fetch("/api/register/create_account", {
       method: "POST",
       headers: {
@@ -281,7 +275,7 @@ export default function Register() {
         authPublicKey,
         twitter,
         telegram,
-        bio: realBio,
+        bio,
       }),
     });
 
@@ -397,7 +391,7 @@ export default function Register() {
   const StateContent: Record<DisplayState, JSX.Element> = {
     [DisplayState.PASSKEY]: (
       <FormStepLayout
-        title="Backpocket Alpha"
+        title="Cursive ZK12 Showcase"
         subtitle={
           <div className="flex flex-col gap-2">
             <div>
@@ -434,22 +428,8 @@ export default function Register() {
         />
         <Input
           type="text"
-          id="tg"
+          id="telegram"
           label="Telegram"
-          placeholder="@username"
-          value={realTg}
-          onChange={(e) =>
-            setRealTg(
-              e.target.value.charAt(0) === "@"
-                ? e.target.value
-                : "@" + e.target.value
-            )
-          }
-        />
-        <Input
-          type="text"
-          id="daimo"
-          label="Daimo"
           placeholder="@username"
           value={telegram}
           onChange={(e) =>
@@ -490,7 +470,7 @@ export default function Register() {
     ),
     [DisplayState.PASSWORD]: (
       <FormStepLayout
-        title="Backpocket Alpha"
+        title="Cursive ZK12 Showcase"
         subtitle="Choose a master password to maintain an encrypted backup your data."
         className="pt-4"
         onSubmit={handleSubmitWithPassword}

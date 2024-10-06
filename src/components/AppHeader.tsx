@@ -103,7 +103,7 @@ export const AppHeaderContent = ({
       children: (
         <>
           <ContentWrapper>
-            <Title>About Backpocket</Title>
+            <Title>About Cursive ZK12 Showcase</Title>
             <Description>
               This app allows you to verifiably digitize in-person experiences
               and make ZK provable claims about the people you have met. You can

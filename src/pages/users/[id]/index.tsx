@@ -31,8 +31,6 @@ import { handleUsername } from "@/lib/client/utils";
 import { Icons } from "@/components/Icons";
 import { logClientEvent } from "@/lib/client/metrics";
 
-const Label = classed.span("text-sm text-gray-12");
-
 interface LinkCardProps {
   label?: string;
   href: string;
@@ -416,17 +414,6 @@ const UserProfilePage = () => {
       }
 
       const fetchedUser = fetchUserByUUID(id);
-      const bioMatch = fetchedUser?.bio?.match(/^@(.*)\|/);
-      const realTg = bioMatch ? bioMatch[1] : null;
-      const actualBio = bioMatch
-        ? fetchedUser?.bio?.substring(bioMatch[0].length)
-        : fetchedUser?.bio;
-
-      if (fetchedUser) {
-        fetchedUser.bio = actualBio ?? undefined;
-        fetchedUser.fc = realTg ?? undefined;
-      }
-
       setUser(fetchedUser);
 
       if (fetchedUser) {
@@ -614,18 +601,8 @@ const UserProfilePage = () => {
               {(user.fc?.length ?? 0) > 1 && (
                 <LinkCard
                   label="Telegram"
-                  href={`https://t.me/${removeLabelStartWith(user.fc, "@")}`}
+                  href={`https://t.me/${removeLabelStartWith(user.tg, "@")}`}
                   value={labelStartWith(user.fc, "@")}
-                />
-              )}
-              {(user.tg?.length ?? 0) > 1 && (
-                <LinkCard
-                  label="Daimo"
-                  href={`https://daimo.com/l/account/${removeLabelStartWith(
-                    user.tg,
-                    "@"
-                  )}`}
-                  value={labelStartWith(user.tg, "@")}
                 />
               )}
             </div>
