@@ -45,11 +45,6 @@ export default async function handler(
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // const existingChipKey = await prisma.chipKey.findFirst();
-  // if (existingChipKey) {
-  //   return res.status(400).json({ error: "Chip keys already exist" });
-  // }
-
   try {
     const allUserIds: number[] = [];
     const speakerUserIds: number[] = [];
@@ -187,15 +182,12 @@ export default async function handler(
         description:
           "Be one of the first 5 to collect 33 taps to claim one of Cursive's exclusive NFC rings.",
         userRequirements: {
-          create: [],
-        },
-        locationRequirements: {
           create: [
             {
               name: "Tap 33 badges at ZK Summit 12",
               numSigsRequired: 33,
               sigNullifierRandomness: getServerRandomNullifierRandomness(), // Ensures signatures cannot be reused to meet this requirement
-              locations: {
+              users: {
                 connect: allUserIds.map((id) => ({ id })),
               },
             },

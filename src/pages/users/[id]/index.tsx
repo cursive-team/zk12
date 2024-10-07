@@ -575,7 +575,7 @@ const UserProfilePage = () => {
         {user?.isSpeaker && (
           <div className="flex flex-col p-3 bg-secondary rounded">
             <span className="font-sans text-sm font-semibold leading-6 text-white">
-              Workshop Speaker
+              ZK Summit 12 Speaker
             </span>
           </div>
         )}

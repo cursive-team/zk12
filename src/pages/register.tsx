@@ -395,8 +395,8 @@ export default function Register() {
         subtitle={
           <div className="flex flex-col gap-2">
             <div>
-              Tap NFC badges to get socials and try ZK & MPC cryptography with
-              others. Set up socials to share, register to maintain an encrypted
+              Tap NFC badges to share socials and try ZK & MPC experiments with
+              other attendees. Registration is required to maintain an encrypted
               backup of your data.
             </div>
           </div>
@@ -537,8 +537,8 @@ export default function Register() {
             <Description>
               <span>
                 {" "}
-                Use MPC to <Underline> discover common contacts</Underline> and
-                to <Underline>query your social graph.</Underline>
+                Use MPC to <Underline> discover commonalities</Underline> and
+                for privacy-preserving <Underline>computations.</Underline>
               </span>
             </Description>
           </div>

@@ -45,7 +45,7 @@ const AppFooter = () => {
       iconSize: 14,
     },
     {
-      label: "1PC",
+      label: "ZK/1PC",
       href: "/proofs",
       icon: Icons.Social,
       iconSize: 14,

@@ -15,7 +15,7 @@ export default function Info() {
       <div className="flex flex-col my-auto justify-center">
         <Title>
           <div className="flex items-center justify-center m-4 gap-2">
-            Tap your NFC badge to get started!
+            <b>Tap your NFC badge to get started!</b>
           </div>
         </Title>
         <div className="flex flex-col gap-2 m-4">
