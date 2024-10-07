@@ -282,7 +282,7 @@ export default function Social() {
           <div className="flex flex-col gap-4 mt-2">
             {activities.length === 1 && (
               <NoResultContent>
-                Get started by tapping rings and NFC stickers!
+                Get started by tapping NFC badges!
               </NoResultContent>
             )}
             {activities.length > 1 &&
@@ -319,7 +319,7 @@ export default function Social() {
           <div className="flex flex-col gap-5 mt-2">
             {contactUsersList.length === 0 && (
               <NoResultContent>
-                Tap rings to share socials and connect with others!
+                Tap NFC badges to share socials and connect with others!
               </NoResultContent>
             )}
             {contactUsersList.length !== 0 &&

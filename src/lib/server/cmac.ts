@@ -1,7 +1,6 @@
-import { keyUids } from "@/shared/keygen";
-const aesjs = require("aes-js");
-
-export const verifyCmac = (hexData: string): string | undefined => {
+export const verifyCmac = async (
+  hexData: string
+): Promise<string | undefined> => {
   if (hexData.startsWith("CURSIVE")) {
     const lastTwoChars = hexData.slice(-2);
     const num = parseInt(lastTwoChars, 10);
@@ -9,41 +8,45 @@ export const verifyCmac = (hexData: string): string | undefined => {
     return hexData;
   }
 
-  if (hexData.startsWith("TALK")) {
-    const lastTwoChars = hexData.slice(-2);
-    const num = parseInt(lastTwoChars, 10);
-    if (isNaN(num) || num < 1 || num > 10) return undefined;
-    return hexData;
-  }
+  try {
+    let response;
+    let data;
+    const maxRetries = 3;
+    let retries = 0;
 
-  const cardKeys = process.env.CARD_KEYS!.split(",");
+    const params = new URLSearchParams({ e: hexData });
 
-  for (const key of cardKeys) {
-    const keyBytes = aesjs.utils.hex.toBytes(key);
-    const iv = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var encryptedBytes = aesjs.utils.hex.toBytes(hexData);
-    const aesCbc = new aesjs.ModeOfOperation.cbc(keyBytes, iv);
-    const decryptedBytes = aesCbc.decrypt(encryptedBytes);
-    // Assuming decryptedBytes is a Uint8Array or similar
-    const p_stream = new Uint8Array(decryptedBytes);
-    // Read the first byte as picc_data_tag
-    const picc_data_tag = p_stream[0];
-    // Bitwise operations for flags
-    const uid_mirroring_en = (picc_data_tag & 0x80) === 0x80;
-    const uid_length = picc_data_tag & 0x0f;
-    // Error handling for unsupported UID length
-    if (uid_length !== 0x07) {
-      continue;
-    }
-    // Read UID if mirroring is enabled
-    if (uid_mirroring_en) {
-      let uid = Buffer.from(p_stream.slice(1, 1 + uid_length))
-        .toString("hex")
-        .toUpperCase();
-      if (keyUids.includes(uid)) {
-        return uid;
+    while (retries < maxRetries) {
+      try {
+        response = await fetch(
+          `http://ec2-52-59-236-57.eu-central-1.compute.amazonaws.com:9091/api/validate?${params}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization:
+                "Bearer d6c1a2cb2a283a4dc8fe452448d10386c4e6d9336a487a8e589be1e58f598c01",
+            },
+          }
+        );
+        data = await response.json();
+        break; // If successful, exit the loop
+      } catch (error) {
+        retries++;
+        if (retries === maxRetries) {
+          throw new Error(`Failed to fetch after ${maxRetries} attempts`);
+        }
+        // Wait for a short time before retrying
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
+
+    console.log(data);
+
+    if (data.valid === true) {
+      return data.tag.uid.toString();
+    }
+  } catch (e) {
+    console.error("Error in get arx route:", e);
   }
 
   return undefined;

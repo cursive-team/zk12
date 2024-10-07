@@ -134,7 +134,7 @@ export default async function handler(
   }
 
   // verify encryption
-  const chipId = verifyCmac(chipEnc);
+  const chipId = await verifyCmac(chipEnc);
   if (!chipId) {
     return res.status(400).json({ error: "Invalid chipEnc provided" });
   }

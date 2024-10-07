@@ -172,8 +172,8 @@ export const AppHeaderContent = ({
         <ContentWrapper>
           <Title>Register</Title>
           <Description>
-            Once you register, you will need to retap the NFC ring to save these
-            socials.
+            Once you register, you will need to retap the NFC badge to save
+            these socials.
           </Description>
           <Description>
             <Button variant="white" onClick={handleSignout}>

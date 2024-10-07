@@ -7,13 +7,13 @@ export default function Document() {
       <Head>
         <meta
           name="description"
-          content="Tap NFC rings to build your social graph, use MPC to query efficiently."
+          content="Tap NFC badges to build your social graph, use MPC to query efficiently."
           key="desc"
         />
         <meta property="og:title" content="Cursive ZK12 Showcase" />
         <meta
           property="og:description"
-          content="Tap NFC rings to build your social graph, use MPC to query efficiently."
+          content="Tap NFC badges to build your social graph, use MPC to query efficiently."
         />
         <meta property="og:image" content="/cursive.jpg" />
         <link

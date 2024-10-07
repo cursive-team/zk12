@@ -395,9 +395,9 @@ export default function Register() {
         subtitle={
           <div className="flex flex-col gap-2">
             <div>
-              Tap NFC rings to build your social graph, use MPC to query
-              efficiently. Set up socials to share, register to maintain an
-              encrypted backup of your data.
+              Tap NFC badges to get socials and try ZK & MPC cryptography with
+              others. Set up socials to share, register to maintain an encrypted
+              backup of your data.
             </div>
           </div>
         }
@@ -518,7 +518,7 @@ export default function Register() {
           <div className="flex flex-col gap-2 m-4">
             <Description>
               <span>
-                Tap other people{"'"}s NFC rings to connect and{" "}
+                Tap other people{"'"}s NFC badges to connect and{" "}
                 <Underline>receive socials</Underline>.
               </span>
             </Description>
