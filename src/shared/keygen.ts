@@ -1,3 +1,18 @@
+export type KeygenData = {
+  box: "brown" | "one" | "two"; // Box the card is located in
+  type: "person" | "talk"; // Person or talk card
+  label?: string; // Label for the card, used for testing
+  isPersonSpeaker?: boolean; // Is this a speaker?
+  talkName?: string; // Name of the talk
+  talkStage?: "main" | "side" | "breakout" | "workshop"; // Stage of the talk
+  talkSpeaker?: string; // Speaker of the talk
+  talkDescription?: string; // Description of the talk
+  talkStartTime?: string; // Start time of the talk ex: 09:00
+  talkEndTime?: string; // End time of the talk ex: 10:00
+};
+
+export const initialKeygenData: Record<string, KeygenData> = {};
+
 export const allSpeakerUids = [
   "04C64F7A061090",
   "045C347A061090",
