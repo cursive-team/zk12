@@ -145,9 +145,7 @@ export default function Fruits() {
     }
 
     const client = new JIFFClient(
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:8080"
-        : "https://mpc-fruits.onrender.com",
+      "https://mpc-fruits-zk-summit-12.onrender.com",
       roomName,
       {
         autoConnect: false,
@@ -398,7 +396,7 @@ export default function Fruits() {
             </span>
             <span className="text-iron-600 text-sm font-normal">
               {`Find a group of 3 or more people 
-              and set your party size accordingly.`}
+              and set your party size accordingly. Reload if you don't see a room.`}
             </span>
           </div>
         </div>
