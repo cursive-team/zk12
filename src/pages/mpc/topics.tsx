@@ -35,18 +35,7 @@ const Title = classed.h3("block font-sans text-iron-950", {
 
 const Description = classed.span("text-md text-iron-600 leading-5");
 
-const possibleOtherFruits = [
-  "Circom",
-  "SP-1",
-  "RiscZero",
-  "Lita",
-  "Plonky3",
-  "Jolt",
-  "Binius",
-  "Turbo/Ultra/Hyper/MegaPLONK",
-];
-
-const fruits = [
+export const topics = [
   "zkVMs",
   "zkTLS",
   "zkRollups",
@@ -75,7 +64,7 @@ export default function Fruits() {
   >({});
   const [jiffClient, setJiffClient] = useState<typeof JIFFClient | null>(null);
   const [ratings, setRatings] = useState<number[]>(
-    Array(fruits.length).fill(0)
+    Array(topics.length).fill(0)
   );
   const [output, setOutput] = useState<OutputState>(OutputState.NOT_CONNECTED);
   const [avgResults, setAvgResults] = useState<number[]>([]);
@@ -212,7 +201,7 @@ export default function Fruits() {
 
       let sumShares: any[] = [];
       for (let i = 1; i <= jiffClient.party_count; i++) {
-        for (let j = 0; j < fruits.length; j++) {
+        for (let j = 0; j < topics.length; j++) {
           if (i === 1) {
             sumShares.push(shares[i][j]);
           } else {
@@ -307,7 +296,7 @@ export default function Fruits() {
       case OutputState.COMPUTING:
         return "Computing...";
       case OutputState.SHOW_RESULTS:
-        return "The fruits have been rated by the crowd!";
+        return "The topics have been rated by the crowd!";
       case OutputState.ERROR:
         return "Error - please try again";
     }
@@ -336,7 +325,7 @@ export default function Fruits() {
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
               🔐 Rate cryptographic topics
             </span>
-            <span className="text-iron-600 text-sm font-normal">{`Rate some fruits with your friends, discover how aligned you
+            <span className="text-iron-600 text-sm font-normal">{`Rate some topics with your friends, discover how aligned you
                       are without revealing any specific votes.`}</span>
           </div>
           <div className="flex flex-col gap-1">
@@ -348,7 +337,7 @@ export default function Fruits() {
           <div>
             {output === OutputState.CONNECTED && (
               <div className="mb-16">
-                {fruits.map((fruit, index) => (
+                {topics.map((fruit, index) => (
                   <div key={index} className="mb-4">
                     <label className="block text-black mb-2">{fruit}</label>
                     <Rating
@@ -369,7 +358,7 @@ export default function Fruits() {
             {output === OutputState.SHOW_RESULTS && (
               <div className="text-black">
                 <div className="flex flex-col gap-4 mb-8">
-                  {fruits
+                  {topics
                     .map((fruit, index) => ({
                       fruit,
                       rating: avgResults[index],
@@ -383,7 +372,7 @@ export default function Fruits() {
                         {`${fruit} `}
                         <Rating value={rating} readOnly precision={0.01} />
                         {`(${rating.toFixed(1)}, std: ${stdResults[
-                          fruits.indexOf(fruit)
+                          topics.indexOf(fruit)
                         ].toFixed(2)})`}
                       </div>
                     ))}

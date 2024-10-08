@@ -196,7 +196,7 @@ const UserProfilePage = () => {
         <Button variant="white" onClick={handleSignout}>
           <div className="flex w-full items-center justify-between">
             <span className="text-iron-600 font-semibold text-xs">
-              Register and retap NFC to backup socials
+              Click to exit preview, then tap your badge
             </span>
             <Icons.ExternalLink className="text-gray-10" />
           </div>

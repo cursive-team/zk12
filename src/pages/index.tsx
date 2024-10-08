@@ -351,27 +351,10 @@ export default function Social() {
         ),
       },
       {
-        label: "Talks",
+        label: "Ratings",
         children: (
           <div className="flex flex-col gap-5 mt-2">
-            {locations.length === 0 ? (
-              <NoResultContent>
-                {"Tap talk stickers to prove attendance and get talk details!"}
-              </NoResultContent>
-            ) : (
-              <div className="flex flex-col gap-2 w-full">
-                {locations.map((location, index) => {
-                  return (
-                    <LinkCard
-                      key={index}
-                      name={location.name}
-                      date={formatDate(location.ts)}
-                      href={`/locations/${location.id}`}
-                    />
-                  );
-                })}
-              </div>
-            )}
+            {<NoResultContent>{"Topic rating will go here"}</NoResultContent>}
           </div>
         ),
       },
