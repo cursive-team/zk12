@@ -85,7 +85,7 @@ export default async function handler(
   }
 
   if (telegram && telegram !== "@" && !telegramUsernameRegex.test(telegram)) {
-    return res.status(400).json({ error: "Invalid Daimo username" });
+    return res.status(400).json({ error: "Invalid Telegram username" });
   }
 
   if (bio && bio.length > 200) {
@@ -97,7 +97,7 @@ export default async function handler(
   let userSignaturePublicKey;
   let userSignaturePrivateKey;
   if (chipEnc) {
-    let chipId = verifyCmac(chipEnc);
+    let chipId = await verifyCmac(chipEnc);
     if (!chipId) {
       return res.status(400).json({ error: "Invalid chipEnc provided" });
     }
@@ -148,7 +148,7 @@ export default async function handler(
   let isExistingChipUser = false;
   let isUserRegistered = false;
   if (chipEnc) {
-    let chipId = verifyCmac(chipEnc);
+    let chipId = await verifyCmac(chipEnc);
     if (!chipId) {
       return res.status(400).json({ error: "Invalid chipEnc provided" });
     }
@@ -166,7 +166,7 @@ export default async function handler(
   if (isExistingChipUser && isUserRegistered) {
     return res.status(400).json({ error: "Card already registered" });
   } else if (isExistingChipUser && chipEnc) {
-    let chipId = verifyCmac(chipEnc);
+    let chipId = await verifyCmac(chipEnc);
     if (!chipId) {
       return res.status(400).json({ error: "Invalid chipEnc provided" });
     }

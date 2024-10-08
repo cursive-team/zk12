@@ -3,18 +3,9 @@ import { useEffect, useState } from "react";
 import {
   deleteAccountFromLocalStorage,
   fetchUserByUUID,
-  getKeys,
-  getLocationSignatures,
-  getProfile,
-  getUsers,
   User,
 } from "@/lib/client/localStorage";
-import {
-  AppBackHeader,
-  AppHeader,
-  AppHeaderContent,
-} from "@/components/AppHeader";
-import { Card } from "@/components/cards/Card";
+import { AppHeaderContent } from "@/components/AppHeader";
 import Link from "next/link";
 import { classed } from "@tw-classed/react";
 import { labelStartWith, removeLabelStartWith } from "@/lib/shared/utils";
@@ -22,21 +13,12 @@ import { InputWrapper } from "@/components/input/InputWrapper";
 import { ArtworkSnapshot } from "@/components/artwork/ArtworkSnapshot";
 import { Button } from "@/components/Button";
 import { supabase } from "@/lib/client/realtime";
-import { toast } from "sonner";
-import { generateSelfBitVector, psiBlobUploadClient } from "@/lib/client/psi";
-import init, { round1_js, round2_js, round3_js } from "@/lib/mp_psi/mp_psi";
-import { encryptOverlapComputedMessage } from "@/lib/client/jubSignal/overlapComputed";
-import { loadMessages } from "@/lib/client/jubSignalClient";
-import { CircleCard } from "@/components/cards/CircleCard";
-import { IconCircle } from "@/components/IconCircle";
 import { ProfilePicModal } from "@/components/modals/ProfilePicModal";
 import useSettings from "@/hooks/useSettings";
 import { Accordion } from "@/components/Accordion";
 import { cn, handleUsername } from "@/lib/client/utils";
 import { Icons } from "@/components/Icons";
 import { logClientEvent } from "@/lib/client/metrics";
-
-const Label = classed.span("text-sm text-gray-12");
 
 interface LinkCardProps {
   label?: string;
@@ -74,17 +56,6 @@ const UserProfilePage = () => {
 
   useEffect(() => {
     const fetchedUser = fetchUserByUUID("0");
-    const bioMatch = fetchedUser?.bio?.match(/^@(.*)\|/);
-    const realTg = bioMatch ? bioMatch[1] : null;
-    const actualBio = bioMatch
-      ? fetchedUser?.bio?.substring(bioMatch[0].length)
-      : fetchedUser?.bio;
-
-    if (fetchedUser) {
-      fetchedUser.bio = actualBio ?? undefined;
-      fetchedUser.fc = realTg ?? undefined;
-    }
-
     setUser(fetchedUser);
   }, [router]);
 
@@ -189,7 +160,7 @@ const UserProfilePage = () => {
         {user?.isSpeaker && (
           <div className="flex flex-col p-3 bg-secondary rounded">
             <span className="font-sans text-sm font-semibold leading-6 text-white">
-              Workshop Speaker
+              ZK Summit 12 Speaker
             </span>
           </div>
         )}
@@ -212,20 +183,10 @@ const UserProfilePage = () => {
                   value={labelStartWith(user.x, "@")}
                 />
               )}
-              {(user.fc?.length ?? 0) > 1 && (
-                <LinkCard
-                  label="Telegram"
-                  href={`https://t.me/${removeLabelStartWith(user.fc, "@")}`}
-                  value={labelStartWith(user.fc, "@")}
-                />
-              )}
               {(user.tg?.length ?? 0) > 1 && (
                 <LinkCard
-                  label="Daimo"
-                  href={`https://daimo.com/l/account/${removeLabelStartWith(
-                    user.tg,
-                    "@"
-                  )}`}
+                  label="Telegram"
+                  href={`https://t.me/${removeLabelStartWith(user.tg, "@")}`}
                   value={labelStartWith(user.tg, "@")}
                 />
               )}
@@ -235,7 +196,7 @@ const UserProfilePage = () => {
         <Button variant="white" onClick={handleSignout}>
           <div className="flex w-full items-center justify-between">
             <span className="text-iron-600 font-semibold text-xs">
-              Register and retap NFC to backup socials
+              Click to exit preview, then tap your badge
             </span>
             <Icons.ExternalLink className="text-gray-10" />
           </div>

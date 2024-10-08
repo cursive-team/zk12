@@ -36,16 +36,17 @@ const Title = classed.h3("block font-sans text-iron-950", {
 const Description = classed.span("text-md text-iron-600 leading-5");
 
 const fruits = [
-  "Cypherpunk Mission-Driven Cryptography",
-  "Introduction to MPC",
-  "Introduction to FHE",
-  "Privacy-preserving Statistics",
-  "Oblivious Message Retrieval for Zcash",
-  "Encrypted Scholarship",
-  "mpz-play",
-  "Write a Circuit in TypeScript",
-  "Private Collaborative Research",
-  "Backpocket Multiplayer Vault Demo",
+  "Memory checking in IVC-based zkVMs (Jens Groth)",
+  "From IVCs to RCGs (Ariel Gabizon)",
+  "Circom buses: the power to structure ZK circuits (Albert Rubio)",
+  "Building cryptographic apps for human connection (Vivek Bhupatiraju & Andrew Lu)",
+  "Analyzing and Benchmarking ZK-Rollups (Stefanos Chaliasos)",
+  "WHIR: Reed–Solomon Proximity Testing with Super-Fast Verification (Eylon Yogev)",
+  "Make Web3 use Web2: verifiable SQL db for contracts (nikkolasg)",
+  "ZK Trust Legos: Luring Web2 Onchain with ZK Primitives (alizk)",
+  "Zirgen: A Novel DSL for Writing Efficient zk-STARK Circuits (Jacob Weightman)",
+  "Abstractions for a multi-prover zkVM (Georg Wiese)",
+  "MegaPlonk. Or, how I learned to stop worrying and love the plonk. (Zac Williamson)",
 ];
 
 export default function Talks() {
@@ -145,14 +146,13 @@ export default function Talks() {
     }
 
     const client = new JIFFClient(
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:8080"
-        : "https://mpc-fruits.onrender.com",
+      "https://mpc-fruits-zk-summit-12.onrender.com",
       roomName,
       {
         autoConnect: false,
         party_count: numParties,
         crypto_provider: true,
+        Zp: 4093,
         // @ts-ignore
         onError: (_, error) => {
           console.error(error);
@@ -182,6 +182,15 @@ export default function Talks() {
   /**
    * MPC sorts
    */
+
+  const mpcMax = (arr: any[]) => {
+    let max = arr[0];
+    for (let i = 1; i < arr.length; i++) {
+      const cmp = arr[i].slt(max);
+      max = cmp.if_else(max, arr[i]);
+    }
+    return max;
+  };
 
   const mpcBubbleSort = (arr: any[]) => {
     for (let i = 0; i < 3; i++) {
@@ -240,11 +249,10 @@ export default function Talks() {
       return;
     }
 
-    const newRatings = ratings.map((rating) => rating * 10);
-
     setOutput(OutputState.AWAITING_OTHER_PARTIES_INPUTS);
 
     if (jiffClient) {
+      const newRatings = ratings.map((rating) => rating * 11);
       console.log(`Beginning MPC with ratings ${newRatings}`);
       let shares = await jiffClient.share_array(newRatings);
       console.log("Shares: ", shares);
@@ -268,19 +276,14 @@ export default function Talks() {
         sumShares[j] = sumShares[j].cadd(j);
       }
 
-      mpcBubbleSort(sumShares);
-
-      const results = await Promise.all(
-        sumShares
-          .slice(-3)
-          .reverse()
-          .map((share: any) => jiffClient.open(share))
-      );
+      const maxShare = mpcMax(sumShares);
+      const max = await jiffClient.open(maxShare);
+      console.log("max", max);
 
       const averageTime = Date.now() - startAverageTime;
       console.log("Ranking Time: ", averageTime);
 
-      setAvgResults(results);
+      setAvgResults([max]);
       setOutput(OutputState.SHOW_RESULTS);
       toast.success(`MPC runtime: ${averageTime}`);
 
@@ -301,7 +304,7 @@ export default function Talks() {
       case OutputState.COMPUTING:
         return "Computing...";
       case OutputState.SHOW_RESULTS:
-        return "Here are the top 3 talks!";
+        return "Here is the top talk!";
       case OutputState.ERROR:
         return "Error - please try again";
     }
@@ -328,9 +331,9 @@ export default function Talks() {
         <div className="flex flex-col gap-6 h-modal">
           <div className="flex flex-col gap-4">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
-              {`📓 Find your group's top 3 talks`}
+              {`🥇 Top main stage talk`}
             </span>
-            <span className="text-iron-600 text-sm font-normal">{`Rate the workshop talks with your friends, and find out the top 3 most loved talks without revealing the ratings of any other ones!`}</span>
+            <span className="text-iron-600 text-sm font-normal">{`Rate the workshop talks with your friends, and find out the crowd favorite without revealing the ratings of any other ones!`}</span>
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
@@ -382,16 +385,14 @@ export default function Talks() {
       <div className="flex flex-col gap-6 h-modal">
         <div className="flex flex-col gap-4">
           <span className="text-lg xs:text-xl text-iron-950 leading-6 font-medium">
-            {`📓 Find your group's top 3 talks`}
+            {`🥇 Top main stage talk`}
           </span>
           <div className="flex flex-col gap-2">
             <span className="text-iron-600 text-sm font-normal">
-              {`Rate the workshop talks with your friends, and find out the top 3 most loved 
-              talks without revealing the ratings of any other ones!`}
+              <span className="text-iron-600 text-sm font-normal">{`Rate the workshop talks with your friends, and find out the crowd favorite without revealing the ratings of any other ones!`}</span>
             </span>
             <span className="text-iron-600 text-sm font-normal">
-              {`Find a group of 3 or more people 
-              and set your party size accordingly.`}
+              {`Note: even with 2 people, this will take ~1 minute. Comparison is really slow in SS-MPC. And it gets quadratically worse with more parties! Reload if you don't see a room.`}
             </span>
           </div>
         </div>

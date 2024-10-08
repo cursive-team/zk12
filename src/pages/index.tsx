@@ -282,7 +282,7 @@ export default function Social() {
           <div className="flex flex-col gap-4 mt-2">
             {activities.length === 1 && (
               <NoResultContent>
-                Get started by tapping rings and NFC stickers!
+                Get started by tapping NFC badges!
               </NoResultContent>
             )}
             {activities.length > 1 &&
@@ -319,7 +319,7 @@ export default function Social() {
           <div className="flex flex-col gap-5 mt-2">
             {contactUsersList.length === 0 && (
               <NoResultContent>
-                Tap rings to share socials and connect with others!
+                Tap NFC badges to share socials and connect with others!
               </NoResultContent>
             )}
             {contactUsersList.length !== 0 &&
@@ -332,17 +332,13 @@ export default function Social() {
                       {users.map((user, index) => {
                         const { name, inTs, bio } = user;
                         const date = inTs ? formatDate(inTs) : "-";
-                        const bioMatch = bio?.match(/^@(.*)\|/);
-                        const actualBio = bioMatch
-                          ? bio?.substring(bioMatch[0].length)
-                          : bio;
 
                         return (
                           <LinkCard
                             key={index}
                             name={name}
                             date={date}
-                            other={actualBio ?? ""}
+                            other={bio ?? ""}
                             href={`/users/${user.uuid}`}
                           />
                         );
@@ -355,27 +351,10 @@ export default function Social() {
         ),
       },
       {
-        label: "Talks",
+        label: "Ratings",
         children: (
           <div className="flex flex-col gap-5 mt-2">
-            {locations.length === 0 ? (
-              <NoResultContent>
-                {"Tap talk stickers to prove attendance and get talk details!"}
-              </NoResultContent>
-            ) : (
-              <div className="flex flex-col gap-2 w-full">
-                {locations.map((location, index) => {
-                  return (
-                    <LinkCard
-                      key={index}
-                      name={location.name}
-                      date={formatDate(location.ts)}
-                      href={`/locations/${location.id}`}
-                    />
-                  );
-                })}
-              </div>
-            )}
+            {<NoResultContent>{"Topic rating will go here"}</NoResultContent>}
           </div>
         ),
       },

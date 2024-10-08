@@ -103,7 +103,7 @@ export const AppHeaderContent = ({
       children: (
         <>
           <ContentWrapper>
-            <Title>About Backpocket</Title>
+            <Title>About Cursive ZK12 Showcase</Title>
             <Description>
               This app allows you to verifiably digitize in-person experiences
               and make ZK provable claims about the people you have met. You can
@@ -172,8 +172,8 @@ export const AppHeaderContent = ({
         <ContentWrapper>
           <Title>Register</Title>
           <Description>
-            Once you register, you will need to retap the NFC ring to save these
-            socials.
+            Once you register, you will need to retap the NFC badge to save
+            these socials.
           </Description>
           <Description>
             <Button variant="white" onClick={handleSignout}>

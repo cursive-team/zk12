@@ -189,7 +189,7 @@ const ProfileForm = ({
               })}
             />
             <Input
-              label="Daimo"
+              label="Telegram"
               error={errors.telegramUsername?.message}
               {...register("telegramUsername", {
                 onChange: (e) => {

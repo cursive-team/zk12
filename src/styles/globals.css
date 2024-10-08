@@ -7,9 +7,9 @@
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
   /* Colors */
-  --bg-primary: #dff1ff;
-  --color-primary: #4015ec;
-  --color-secondary: #8c73f4;
+  --bg-primary: #ffffd4;
+  --color-primary: #9c5eff;
+  --color-secondary: #be96ff;
   --color-tertiary: #e9f3ff;
   --color-error: #d40018;
 }
@@ -28,7 +28,7 @@ body {
   padding: 0;
   height: 100%;
   @apply text-iron-950;
-  background: linear-gradient(180deg, #bde1f9 0%, #bdd6fc 100%);
+  background: linear-gradient(180deg, #ffffd4 0%, #fefead 100%);
   background-repeat: no-repeat;
   background-size: cover;
   text-rendering: geometricPrecision;

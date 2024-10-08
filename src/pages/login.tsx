@@ -176,7 +176,7 @@ export default function Login() {
   if (displayState === DisplayState.PASSKEY) {
     return (
       <FormStepLayout
-        title="Backpocket Alpha"
+        title="Cursive ZK12 Showcase"
         subtitle="Login to view your social graph and make queries."
         className="pt-4"
         onSubmit={handleSubmitWithPasskey}
@@ -209,7 +209,7 @@ export default function Login() {
   } else if (displayState === DisplayState.PASSWORD) {
     return (
       <FormStepLayout
-        title="Backpocket Alpha"
+        title="Cursive ZK12 Showcase"
         subtitle="Login to view your social graph and event activity, or tap your card if you haven’t registered."
         className="pt-4"
         onSubmit={handleSubmitWithPassword}

@@ -40,9 +40,9 @@ export default function QuestsPage() {
 
   return (
     <div className="flex flex-col gap-4 pt-4">
-      <span className="text-iron-600 font-sans text-xs">
-        Post proofs about your Backpocket experience on Twitter, while
-        preserving privacy over the people you met and talks you attended.
+      <span className="text-iron-600 font-sans text-sm">
+        Make ZKPs about your event engagement to claim prizes & brag verifiably
+        on Twitter, all while presering privacy over who you met!
       </span>
 
       <LoadingWrapper

@@ -45,13 +45,13 @@ const AppFooter = () => {
       iconSize: 14,
     },
     {
-      label: "Proofs",
+      label: "ZK",
       href: "/proofs",
       icon: Icons.Proof,
       iconSize: 14,
     },
     {
-      label: "Queries",
+      label: "MPC",
       href: "/mpc",
       icon: Icons.Social,
       iconSize: 14,

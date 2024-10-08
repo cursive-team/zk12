@@ -56,7 +56,7 @@ export const ProfileSchema = object({
     .optional(),
   telegramUsername: string()
     .matches(telegramUsernameRegex, {
-      message: "Invalid Daimo username.",
+      message: "Invalid Telegram username.",
       excludeEmptyString: true,
     })
     .trim()
