@@ -283,6 +283,67 @@ export default function Social() {
 
     return [
       {
+        label: "Hot Takes",
+        children: (
+          <div className="flex flex-col gap-2 mt-2">
+            <span className="text-iron-950 font-sans font-bold text-sm mb-2">
+              Underrated or overrated?
+            </span>
+
+            <span className="text-iron-600 font-sans text-sm">
+              Privately attest to your hot takes on crytography topics, find
+              likeminded attendees with PSI and aggregate group statistics with
+              MPC!
+            </span>
+            <span className="text-iron-600 font-sans text-sm mb-4">
+              1 star is underrated, 2 stars is rated, 3 stars is overrated.
+            </span>
+
+            {topics.map((topic, index) => (
+              <div key={index} className="flex flex-row gap-2">
+                <label className="block text-black mb-2">{topic}</label>
+                <Rating
+                  name={`rating-${index}`}
+                  value={ratings[index]}
+                  onChange={(event, newValue) => {
+                    const newRatings = [...ratings];
+                    newRatings[index] = newValue || 0;
+                    console.log(newValue);
+
+                    if (newValue !== null) {
+                      const locationUpdate: LocationTapResponse = {
+                        id: (index * 3 + newValue - 1).toString(),
+                        name:
+                          topics[index] +
+                          [" underrated", " rated", " overrated"][newValue - 1],
+                        stage: "",
+                        speaker: "",
+                        description: "",
+                        startTime: "",
+                        endTime: "",
+                        signaturePublicKey: "",
+                        signatureMessage: "",
+                        signature: "",
+                      };
+
+                      [0, 1, 2].forEach((i) => {
+                        deleteLocationSignature((index * 3 + i).toString());
+                      });
+
+                      updateLocationSignatureFromTap(locationUpdate);
+                    }
+
+                    // Force a re-render by updating the state
+                    setRatings([...newRatings]);
+                  }}
+                  max={3}
+                />
+              </div>
+            ))}
+          </div>
+        ),
+      },
+      {
         label: "Activity Feed",
         children: (
           <div className="flex flex-col gap-4 mt-2">
@@ -353,67 +414,6 @@ export default function Social() {
                   </ListLayout>
                 );
               })}
-          </div>
-        ),
-      },
-      {
-        label: "Ratings",
-        children: (
-          <div className="flex flex-col gap-2 mt-2">
-            <span className="text-iron-950 font-sans font-bold text-sm mb-2">
-              Underrated or overrated?
-            </span>
-
-            <span className="text-iron-600 font-sans text-xs">
-              Privately attest to your hot takes on crytography topics, find
-              likeminded attendees with PSI and aggregate group statistics with
-              MPC!
-            </span>
-            <span className="text-iron-600 font-sans text-xs mb-4">
-              1 star is underrated, 2 stars is rated, 3 stars is overrated.
-            </span>
-
-            {topics.map((topic, index) => (
-              <div key={index} className="flex flex-row gap-2">
-                <label className="block text-black mb-2">{topic}</label>
-                <Rating
-                  name={`rating-${index}`}
-                  value={ratings[index]}
-                  onChange={(event, newValue) => {
-                    const newRatings = [...ratings];
-                    newRatings[index] = newValue || 0;
-                    console.log(newValue);
-
-                    if (newValue !== null) {
-                      const locationUpdate: LocationTapResponse = {
-                        id: (index * 3 + newValue - 1).toString(),
-                        name:
-                          topics[index] +
-                          [" underrated", " rated", " overrated"][newValue - 1],
-                        stage: "",
-                        speaker: "",
-                        description: "",
-                        startTime: "",
-                        endTime: "",
-                        signaturePublicKey: "",
-                        signatureMessage: "",
-                        signature: "",
-                      };
-
-                      [0, 1, 2].forEach((i) => {
-                        deleteLocationSignature((index * 3 + i).toString());
-                      });
-
-                      updateLocationSignatureFromTap(locationUpdate);
-                    }
-
-                    // Force a re-render by updating the state
-                    setRatings([...newRatings]);
-                  }}
-                  max={3}
-                />
-              </div>
-            ))}
           </div>
         ),
       },
