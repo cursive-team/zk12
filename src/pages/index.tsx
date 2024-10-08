@@ -9,12 +9,14 @@ import {
   Activity,
   Profile,
   User,
+  deleteLocationSignature,
   getActivities,
   getAuthToken,
   getKeys,
   getLocationSignatures,
   getProfile,
   getUsers,
+  updateLocationSignatureFromTap,
 } from "@/lib/client/localStorage";
 import { JUB_SIGNAL_MESSAGE_TYPE } from "@/lib/client/jubSignal";
 import { SliderModal } from "@/components/modals/SliderModal";
@@ -32,6 +34,9 @@ import { NoResultContent } from "@/components/NoResultContent";
 import { classed } from "@tw-classed/react";
 import { logClientEvent } from "@/lib/client/metrics";
 import { toast } from "sonner";
+import { topics } from "./mpc/topics";
+import Rating from "@mui/material/Rating";
+import { LocationTapResponse } from "./api/tap/cmac";
 
 interface LinkCardProps {
   name: string;
@@ -209,6 +214,14 @@ export default function Social() {
   const [numConnections, setNumConnections] = useState<number>(0);
   const [tabsItems, setTabsItems] = useState<TabsProps["items"]>();
   const [isLoading, setLoading] = useState(false);
+  const [ratings, setRatings] = useState<number[]>(
+    topics.map((_, i) => {
+      const filtered = [0, 1, 2].filter((j) =>
+        Object.keys(getLocationSignatures()).includes((i * 3 + j).toString())
+      );
+      return filtered.length > 0 ? Math.max(...filtered) + 1 : 0;
+    })
+  );
 
   const isMenuOpen = getState().isMenuOpen ?? false;
 
@@ -266,14 +279,7 @@ export default function Social() {
       }
     });
     groupedContactUsers.push(currentLetterUsers);
-
-    const locationSignatures = getLocationSignatures();
-    const locations = Object.entries(locationSignatures)
-      .map(([key, value]) => ({
-        ...value,
-        id: key,
-      }))
-      .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
+    console.log(ratings);
 
     return [
       {
@@ -353,8 +359,61 @@ export default function Social() {
       {
         label: "Ratings",
         children: (
-          <div className="flex flex-col gap-5 mt-2">
-            {<NoResultContent>{"Topic rating will go here"}</NoResultContent>}
+          <div className="flex flex-col gap-2 mt-2">
+            <span className="text-iron-950 font-sans font-bold text-sm mb-2">
+              Underrated or overrated?
+            </span>
+
+            <span className="text-iron-600 font-sans text-xs">
+              Privately attest to your hot takes on crytography topics, find
+              likeminded attendees with PSI and aggregate group statistics with
+              MPC!
+            </span>
+            <span className="text-iron-600 font-sans text-xs mb-4">
+              1 star is underrated, 2 stars is rated, 3 stars is overrated.
+            </span>
+
+            {topics.map((topic, index) => (
+              <div key={index} className="flex flex-row gap-2">
+                <label className="block text-black mb-2">{topic}</label>
+                <Rating
+                  name={`rating-${index}`}
+                  value={ratings[index]}
+                  onChange={(event, newValue) => {
+                    const newRatings = [...ratings];
+                    newRatings[index] = newValue || 0;
+                    console.log(newValue);
+
+                    if (newValue !== null) {
+                      const locationUpdate: LocationTapResponse = {
+                        id: (index * 3 + newValue - 1).toString(),
+                        name:
+                          topics[index] +
+                          [" underrated", " rated", " overrated"][newValue - 1],
+                        stage: "",
+                        speaker: "",
+                        description: "",
+                        startTime: "",
+                        endTime: "",
+                        signaturePublicKey: "",
+                        signatureMessage: "",
+                        signature: "",
+                      };
+
+                      [0, 1, 2].forEach((i) => {
+                        deleteLocationSignature((index * 3 + i).toString());
+                      });
+
+                      updateLocationSignatureFromTap(locationUpdate);
+                    }
+
+                    // Force a re-render by updating the state
+                    setRatings([...newRatings]);
+                  }}
+                  max={3}
+                />
+              </div>
+            ))}
           </div>
         ),
       },
@@ -362,7 +421,7 @@ export default function Social() {
   };
 
   useEffect(() => {
-    const updateSocialInfo = async () => {
+    const setSocialInfo = async () => {
       setLoading(true);
 
       const profileData = getProfile();
@@ -411,8 +470,15 @@ export default function Social() {
       setLoading(false);
     };
 
-    updateSocialInfo();
-  }, [router]);
+    if (tabsItems) {
+      const profileData = getProfile();
+      const users = getUsers();
+      const activities = getActivities();
+      setTabsItems(computeTabsItems(profileData!, users, activities));
+    } else {
+      setSocialInfo();
+    }
+  }, [router, ratings]);
 
   if (isLoading) {
     return (

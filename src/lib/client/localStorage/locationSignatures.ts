@@ -35,9 +35,9 @@ export const getLocationSignatures = (): Record<string, LocationSignature> => {
 };
 
 // Populate location information based on a tap
-export const updateLocationSignatureFromTap = async (
+export const updateLocationSignatureFromTap = (
   locationUpdate: LocationTapResponse
-): Promise<string> => {
+): string => {
   const signatures = getLocationSignatures();
 
   const newLocationSignature = {
@@ -65,4 +65,12 @@ export const getLocationSignature = (
 
 export const deleteAllLocationSignatures = (): void => {
   deleteFromLocalStorage(LOCATION_SIGNATURES_STORAGE_KEY);
+};
+
+export const deleteLocationSignature = (locationId: string): void => {
+  const signatures = getLocationSignatures();
+  if (signatures[locationId]) {
+    delete signatures[locationId];
+    saveLocationSignatures(signatures);
+  }
 };

@@ -10,12 +10,11 @@ import { Input } from "@/components/Input";
 import { Room, RoomMember } from "@prisma/client";
 import { Spinner } from "@/components/Spinner";
 import { classed } from "@tw-classed/react";
+import { getLocationSignatures } from "@/lib/client/localStorage";
 
 enum OutputState {
   NOT_CONNECTED,
   AWAITING_OTHER_PARTIES_CONNECTION,
-  CONNECTED,
-  AWAITING_OTHER_PARTIES_INPUTS,
   COMPUTING,
   SHOW_RESULTS,
   ERROR,
@@ -72,6 +71,7 @@ export default function Fruits() {
   const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
   const [loadingCreateRoom, setLoadingCreateRoom] = useState<boolean>(false);
   const [loadingJoin, setLoadingJoin] = useState<number>();
+  const [disableRoom, setDisableRoom] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -89,6 +89,18 @@ export default function Fruits() {
       setCreateRoomPassword("");
       setLoadingRooms(false);
       setAllRooms(roomsMapping);
+
+      const presetRatings = topics.map((_, i) => {
+        const filtered = [0, 1, 2].filter((j) =>
+          Object.keys(getLocationSignatures()).includes((i * 3 + j).toString())
+        );
+        return filtered.length > 0 ? Math.max(...filtered) + 1 : 0;
+      });
+
+      if (presetRatings.some((rating) => rating === 0)) {
+        setDisableRoom(true);
+      }
+      setRatings(presetRatings);
     };
     fetchRooms();
   }, []);
@@ -143,13 +155,13 @@ export default function Fruits() {
     setLoadingCreateRoom(false);
   };
 
-  const connect = (roomName: string, numParties: number) => {
+  const connect = async (roomName: string, numParties: number) => {
     if (!roomName || numParties < 2) {
       toast.error("Please enter a valid room name and party count.");
       return;
     }
 
-    const client = new JIFFClient(
+    const jiffClient = new JIFFClient(
       "https://mpc-fruits-zk-summit-12.onrender.com",
       roomName,
       {
@@ -171,26 +183,24 @@ export default function Fruits() {
         },
         onConnect: () => {
           console.log("Connected to server");
-          setOutput(OutputState.CONNECTED);
+          setOutput(OutputState.COMPUTING);
         },
       }
     );
 
-    client.apply_extension(JIFFClientBigNumber, {});
-    client.connect();
+    jiffClient.apply_extension(JIFFClientBigNumber, {});
+    jiffClient.connect();
+    setJiffClient(jiffClient);
     setOutput(OutputState.AWAITING_OTHER_PARTIES_CONNECTION);
-    setJiffClient(client);
   };
 
-  const submit = async () => {
-    if (ratings.some((rating) => rating < 1 || rating > 5)) {
-      toast.error("All ratings must be between 1 and 5.");
-      return;
-    }
+  useEffect(() => {
+    async function submitCompute() {
+      if (ratings.some((rating) => rating < 1 || rating > 3)) {
+        toast.error("All ratings must be between 1 and 3.");
+        return;
+      }
 
-    setOutput(OutputState.AWAITING_OTHER_PARTIES_INPUTS);
-
-    if (jiffClient) {
       console.log(`Beginning MPC with ratings ${ratings}`);
       let shares = await jiffClient.share_array(ratings);
       console.log("Shares: ", shares);
@@ -209,11 +219,6 @@ export default function Fruits() {
           }
         }
       }
-
-      // for (let k = 0; k < sumShares.length; k++) {
-      //   sumShares[k] = sumShares[k].cdiv(jiffClient.party_count);
-      // }
-      // console.log("Averaged Sum Shares: ", sumShares);
 
       const sumResults = await Promise.all(
         sumShares.map((share: any) => jiffClient.open(share))
@@ -281,7 +286,11 @@ export default function Fruits() {
         `MPC runtime: ${averageTime}ms for average, ${stdTime}ms for standard deviation`
       );
     }
-  };
+
+    if (jiffClient && output === OutputState.COMPUTING) {
+      submitCompute();
+    }
+  }, [jiffClient, ratings, output]);
 
   const getButtonDisplay = (): string => {
     switch (output) {
@@ -289,14 +298,10 @@ export default function Fruits() {
         return "Connect";
       case OutputState.AWAITING_OTHER_PARTIES_CONNECTION:
         return "Awaiting other parties connection...";
-      case OutputState.CONNECTED:
-        return "Submit ratings to proceed!";
-      case OutputState.AWAITING_OTHER_PARTIES_INPUTS:
-        return "Awaiting other parties inputs...";
       case OutputState.COMPUTING:
         return "Computing...";
       case OutputState.SHOW_RESULTS:
-        return "The topics have been rated by the crowd!";
+        return "Crowd consensus, from underrated to overrated!";
       case OutputState.ERROR:
         return "Error - please try again";
     }
@@ -335,26 +340,6 @@ export default function Fruits() {
             <Description>{getButtonDisplay()}</Description>
           </div>
           <div>
-            {output === OutputState.CONNECTED && (
-              <div className="mb-16">
-                {topics.map((fruit, index) => (
-                  <div key={index} className="mb-4">
-                    <label className="block text-black mb-2">{fruit}</label>
-                    <Rating
-                      name={`rating-${index}`}
-                      value={ratings[index]}
-                      onChange={(event, newValue) => {
-                        const newRatings = [...ratings];
-                        newRatings[index] = newValue || 0;
-                        setRatings(newRatings);
-                      }}
-                      max={5}
-                    />
-                  </div>
-                ))}
-                <Button onClick={submit}>Submit</Button>
-              </div>
-            )}
             {output === OutputState.SHOW_RESULTS && (
               <div className="text-black">
                 <div className="flex flex-col gap-4 mb-8">
@@ -363,14 +348,19 @@ export default function Fruits() {
                       fruit,
                       rating: avgResults[index],
                     }))
-                    .sort((a, b) => b.rating - a.rating)
+                    .sort((a, b) => a.rating - b.rating)
                     .map(({ fruit, rating }, index) => (
                       <div
                         className="flex flex-row align-center gap-2"
                         key={index}
                       >
                         {`${fruit} `}
-                        <Rating value={rating} readOnly precision={0.01} />
+                        <Rating
+                          value={rating}
+                          readOnly
+                          precision={0.01}
+                          max={3}
+                        />
                         {`(${rating.toFixed(1)}, std: ${stdResults[
                           topics.indexOf(fruit)
                         ].toFixed(2)})`}
@@ -397,7 +387,7 @@ export default function Fruits() {
           <div className="flex flex-col gap-2">
             <span className="text-iron-600 text-sm font-normal">
               {`Use secret-sharing MPC to compute average & standard deviation
-                  without revealing individual ratings.`}
+                  without revealing individual ratings, which are set on your home page.`}
             </span>
             <span className="text-iron-600 text-sm font-normal">
               {`Find a group of 3 or more people 
@@ -436,7 +426,9 @@ export default function Fruits() {
                           size="small"
                           variant="tertiary"
                           disabled={
-                            loadingJoin !== undefined && loadingJoin !== room.id
+                            (loadingJoin !== undefined &&
+                              loadingJoin !== room.id) ||
+                            disableRoom
                           }
                           loading={loadingJoin === room.id}
                           onClick={async () => {
@@ -504,8 +496,12 @@ export default function Fruits() {
               value={createRoomPassword}
               onChange={(e) => setCreateRoomPassword(e.target.value)}
             />
-            <Button onClick={handleCreateRoom} loading={loadingCreateRoom}>
-              Create
+            <Button
+              onClick={handleCreateRoom}
+              disabled={disableRoom}
+              loading={loadingCreateRoom}
+            >
+              {disableRoom ? "Rate topics in home page first." : "Create"}
             </Button>
           </div>
         </div>
