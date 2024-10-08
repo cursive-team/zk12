@@ -598,11 +598,11 @@ const UserProfilePage = () => {
                   value={labelStartWith(user.x, "@")}
                 />
               )}
-              {(user.fc?.length ?? 0) > 1 && (
+              {(user.tg?.length ?? 0) > 1 && (
                 <LinkCard
                   label="Telegram"
                   href={`https://t.me/${removeLabelStartWith(user.tg, "@")}`}
-                  value={labelStartWith(user.fc, "@")}
+                  value={labelStartWith(user.tg, "@")}
                 />
               )}
             </div>
