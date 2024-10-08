@@ -38,18 +38,18 @@ const Description = classed.span("text-md text-iron-600 leading-5");
 export const topics = [
   "zkVMs",
   "zkTLS",
-  "zkRollups",
   "zkML",
   "zkEmail",
   "Binius",
   "Circle STARKs",
   "Folding",
-  "Proof network",
-  "coSNARK",
+  "Prover network",
+  "coSNARKs",
   "MPC",
   "MP-TLS",
   "FHE",
   "fhEVM",
+  "TEEs",
   "Bitcoin",
 ];
 
