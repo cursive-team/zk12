@@ -180,7 +180,7 @@ const UserProfilePage = () => {
     for (let i = 0; i < overlap.length; i++) {
       if (overlap[i] >= 1000) {
         continue;
-      } else if (overlap[i] > 500) {
+      } else if (overlap[i] >= 500) {
         const locationId = (overlap[i] - 500).toString();
         locationOverlapIds.push({
           locationId,
